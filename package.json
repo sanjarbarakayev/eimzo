@@ -1,0 +1,37 @@
+{
+  "name": "eimzo",
+  "private": true,
+  "version": "0.0.0",
+  "description": "E-IMZO digital signature SDK for JavaScript frameworks",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanjarbarakayev/eimzo.git"
+  },
+  "homepage": "https://github.com/sanjarbarakayev/eimzo#readme",
+  "bugs": {
+    "url": "https://github.com/sanjarbarakayev/eimzo/issues"
+  },
+  "author": "Sanjar Barakayev",
+  "license": "MIT",
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "test": "turbo test",
+    "test:run": "turbo test:run",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean && rm -rf node_modules",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "turbo build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.3.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

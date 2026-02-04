@@ -1,0 +1,56 @@
+# @eimzo/core
+
+Framework-agnostic core library for E-IMZO electronic digital signature system.
+
+## Installation
+
+```bash
+npm install @eimzo/core
+```
+
+## Usage
+
+```typescript
+import { EIMZOClient, CAPIWS, detectEIMZO } from '@eimzo/core'
+
+// Check if E-IMZO is installed
+const status = await detectEIMZO()
+if (status.isRunning) {
+  console.log('E-IMZO is running on port', status.port)
+}
+```
+
+### Crypto Utilities
+
+```typescript
+import { crc32, gosthash } from '@eimzo/core/crypto'
+
+const checksum = crc32('data')
+const hash = gosthash('data')
+```
+
+### Mobile QR Code
+
+```typescript
+import { EIMZOMobile } from '@eimzo/core/mobile'
+
+const result = EIMZOMobile.generateQRCodeData('siteId', 'docNumber', 'content')
+// Use result.code with your QR library
+```
+
+### Internationalization
+
+```typescript
+import { setLocale, getErrorMessage } from '@eimzo/core/i18n'
+
+setLocale('uz')
+console.log(getErrorMessage('WRONG_PASSWORD'))
+```
+
+## API
+
+See the [full documentation](https://github.com/sanjarbarakayev/eimzo#readme).
+
+## License
+
+MIT

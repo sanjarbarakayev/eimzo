@@ -1,0 +1,73 @@
+{
+  "name": "@eimzo/vue",
+  "version": "2.0.0",
+  "description": "E-IMZO digital signature SDK for Vue 3",
+  "author": "Sanjar Barakayev",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanjarbarakayev/eimzo.git",
+    "directory": "packages/vue"
+  },
+  "homepage": "https://github.com/sanjarbarakayev/eimzo#readme",
+  "bugs": {
+    "url": "https://github.com/sanjarbarakayev/eimzo/issues"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "e-imzo",
+    "eimzo",
+    "digital-signature",
+    "electronic-signature",
+    "eds",
+    "pkcs7",
+    "uzbekistan",
+    "cryptography"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "vue-tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@eimzo/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0",
+    "vue": "^3.3.0",
+    "vue-tsc": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
