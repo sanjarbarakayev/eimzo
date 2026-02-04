@@ -22,6 +22,17 @@ export { EIMZOClient } from "./client";
 // Types
 export * from "./types";
 
+// i18n
+export {
+  i18n,
+  setLocale,
+  getLocale,
+  getErrorMessage,
+  getSupportedLocales,
+  isLocaleSupported,
+  detectAndSetBrowserLocale,
+} from "./i18n";
+
 // Utilities
 export {
   detectEIMZO,

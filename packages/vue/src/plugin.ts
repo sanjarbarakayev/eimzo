@@ -15,9 +15,19 @@
  * ```
  */
 
-import { ESignature } from "./core/eimzo";
+import { ESignature } from "./eimzo";
 import type { App, InjectionKey } from "vue";
-import type { ESignaturePluginOptions } from "@eimzo/core";
+import type { ApiKeyPair } from "@eimzo/core";
+
+/**
+ * Vue plugin configuration options
+ */
+export interface ESignaturePluginOptions {
+  /** Additional API keys for domain authorization */
+  apiKeys?: ApiKeyPair[];
+  /** Auto-install on Vue plugin registration */
+  autoInstall?: boolean;
+}
 
 // ============================================================================
 // Injection Key for provide/inject pattern

@@ -13,7 +13,7 @@ import type {
   CAPIWSVersionResponse,
   TimeoutOptions,
 } from "./types";
-import { TimeoutError } from "../utils/resilience";
+import { TimeoutError } from "./utils/resilience";
 
 // ============================================================================
 // Base64 Utilities

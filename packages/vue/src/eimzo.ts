@@ -35,7 +35,15 @@
  * ```
  */
 
-import { EIMZOClient } from "./client";
+import {
+  EIMZOClient,
+  EIMZO_VERSION,
+  getErrorMessage,
+  withResilience,
+  isTransientError,
+  TimeoutError,
+  RetryExhaustedError,
+} from "@eimzo/core";
 import type {
   Certificate,
   LoadKeyResult,
@@ -44,14 +52,6 @@ import type {
   ESignatureOptions,
   ResilienceOptions,
 } from "@eimzo/core";
-import { EIMZO_VERSION } from "@eimzo/core";
-import { getErrorMessage } from "../i18n";
-import {
-  withResilience,
-  isTransientError,
-  TimeoutError,
-  RetryExhaustedError,
-} from "../utils/resilience";
 
 /**
  * Default resilience options for ESignature operations

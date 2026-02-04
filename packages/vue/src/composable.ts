@@ -40,7 +40,7 @@
  */
 
 import { inject, ref, readonly, type Ref, type DeepReadonly } from "vue";
-import { ESignature } from "./core/eimzo";
+import { ESignature } from "./eimzo";
 import { ESIGNATURE_INJECTION_KEY } from "./plugin";
 import type {
   Certificate,
