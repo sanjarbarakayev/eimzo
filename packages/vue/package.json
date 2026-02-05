@@ -47,7 +47,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && cp src/index.d.ts dist/index.d.ts && cp src/index.d.ts dist/index.d.cts",
     "dev": "tsup --watch",
     "test": "vitest",
     "test:run": "vitest run",
@@ -61,8 +61,12 @@
     "vue": "^3.3.0"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.4",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.5.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
+    "unplugin-vue": "^7.1.1",
     "vitest": "^2.0.0",
     "vue": "^3.3.0",
     "vue-tsc": "^2.0.0"

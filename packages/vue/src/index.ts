@@ -33,5 +33,21 @@ export type { UseESignatureReturn, UseESignatureOptions } from "./composable";
 // ESignature class (for non-composable usage)
 export { ESignature } from "./eimzo";
 
+// Client Factory
+export { createEIMZOClient } from "./create-client";
+export type { EnhancedEIMZOClient } from "./create-client";
+
+// Components
+export { default as ESignatureErrorBoundary } from "./components/ESignatureErrorBoundary.vue";
+export {
+  ERROR_BOUNDARY_KEY,
+  type ErrorBoundarySlotProps,
+  type ErrorBoundaryContext,
+  type ESignatureErrorBoundaryProps,
+} from "./components/error-boundary-types";
+
+// Composables
+export { useErrorBoundary } from "./composables/useErrorBoundary";
+
 // Re-export everything from core for convenience
 export * from "@eimzo/core";

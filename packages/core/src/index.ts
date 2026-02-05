@@ -57,3 +57,57 @@ export {
   DEFAULT_RESILIENCE_OPTIONS,
 } from "./utils/resilience";
 export type { ErrorType } from "./utils/resilience";
+
+// Events
+export { EIMZOEventEmitter } from "./events";
+export type { EIMZOEvents, ErrorContext } from "./events";
+
+// Middleware
+export {
+  MiddlewareExecutor,
+  loggingMiddleware,
+  analyticsMiddleware,
+  performanceMiddleware,
+  cachingMiddleware,
+  transformMiddleware,
+  errorHandlingMiddleware,
+} from "./middleware";
+export type { Middleware, MiddlewareContext } from "./middleware";
+
+// Adapters
+export {
+  BrowserWebSocketAdapter,
+  MockWebSocketAdapter,
+} from "./adapters";
+export type { WebSocketAdapter } from "./adapters";
+
+// Client Factory
+export { createEIMZOClient, hasEventEmitter, hasAdapter } from "./create-client";
+export type { EIMZOClientConfig, EnhancedClient } from "./create-client";
+
+// Errors
+export { EIMZOError, AggregateSignError, executeBatch } from "./errors";
+export type {
+  ErrorContext as EIMZOErrorContext,
+  EIMZOErrorOptions,
+  BatchFailure,
+  BatchResult,
+  ExecuteBatchOptions,
+} from "./errors";
+
+// Recovery
+export {
+  RecoveryExecutor,
+  reconnectStrategy,
+  certificateRefreshStrategy,
+  versionCheckStrategy,
+  DEFAULT_RECOVERY_STRATEGIES,
+  createStrategy,
+} from "./recovery";
+export type {
+  RecoveryStrategy,
+  RecoveryContext,
+  RecoveryResult,
+  RecoveryClient,
+  RecoveryExecutorOptions,
+} from "./recovery";
