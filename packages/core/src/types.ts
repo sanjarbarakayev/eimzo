@@ -4,6 +4,13 @@
  */
 
 // ============================================================================
+// Type Safety Primitives (Phase 2)
+// ============================================================================
+
+// Re-export all type safety primitives from the types/ directory
+export * from './types/index';
+
+// ============================================================================
 // Certificate Types
 // ============================================================================
 
@@ -567,6 +574,10 @@ export interface ESignatureOptions {
   maxRetries?: number;
   /** Callback fired before each retry attempt */
   onRetry?: (operation: string, attempt: number, error: Error) => void;
+  /** Middleware functions to intercept operations */
+  middleware?: Array<(ctx: any, next: () => Promise<unknown>) => Promise<unknown>>;
+  /** Enable event emitter (default: false) */
+  enableEvents?: boolean;
 }
 
 /**

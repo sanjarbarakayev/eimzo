@@ -43,6 +43,9 @@ import {
   isTransientError,
   TimeoutError,
   RetryExhaustedError,
+  MiddlewareExecutor,
+  EIMZOEventEmitter,
+  createKeyId,
 } from "@eimzo/core";
 import type {
   Certificate,
@@ -51,13 +54,14 @@ import type {
   VersionInfo,
   ESignatureOptions,
   ResilienceOptions,
+  MiddlewareContext,
 } from "@eimzo/core";
 
 /**
  * Default resilience options for ESignature operations
  */
 const DEFAULT_ESIGNATURE_OPTIONS: Required<
-  Omit<ESignatureOptions, "onRetry">
+  Omit<ESignatureOptions, "onRetry" | "middleware" | "enableEvents">
 > = {
   timeout: 30000,
   enableRetry: true,
@@ -70,6 +74,8 @@ const DEFAULT_ESIGNATURE_OPTIONS: Required<
 export class ESignature {
   private _loadedKey: Certificate | null = null;
   private readonly options: ESignatureOptions;
+  private middlewareExecutor?: MiddlewareExecutor;
+  public eventEmitter?: EIMZOEventEmitter;
 
   apiKeys: string[] = [
     "localhost",
@@ -85,6 +91,16 @@ export class ESignature {
    */
   constructor(options: ESignatureOptions = {}) {
     this.options = { ...DEFAULT_ESIGNATURE_OPTIONS, ...options };
+
+    // Initialize middleware executor if middleware provided
+    if (options.middleware && options.middleware.length > 0) {
+      this.middlewareExecutor = new MiddlewareExecutor(options.middleware);
+    }
+
+    // Initialize event emitter if enabled
+    if (options.enableEvents) {
+      this.eventEmitter = new EIMZOEventEmitter();
+    }
   }
 
   get loadedKey(): Certificate | null {
@@ -101,6 +117,7 @@ export class ESignature {
    * @param operationName - Name of the operation (for logging/callbacks)
    * @param operation - The async operation to execute
    * @param overrideOptions - Optional override for resilience options
+   * @param params - Parameters passed to operation (for middleware context)
    * @returns Promise that resolves with the operation result
    *
    * @internal
@@ -108,7 +125,8 @@ export class ESignature {
   private async executeWithResilience<T>(
     operationName: string,
     operation: () => Promise<T>,
-    overrideOptions?: Partial<ResilienceOptions>
+    overrideOptions?: Partial<ResilienceOptions>,
+    params: unknown[] = []
   ): Promise<T> {
     const resilienceOptions: ResilienceOptions = {
       timeout: overrideOptions?.timeout ?? this.options.timeout,
@@ -123,12 +141,72 @@ export class ESignature {
         if (overrideOptions?.onRetry) {
           overrideOptions.onRetry(attempt, error, delay);
         }
+        // Emit retry event
+        if (this.eventEmitter && error instanceof Error) {
+          this.eventEmitter.emit("retry", {
+            operation: operationName,
+            attempt,
+            error,
+          });
+        }
       },
     };
 
+    // Create middleware context
+    const ctx: MiddlewareContext = {
+      operation: operationName,
+      params,
+      metadata: {},
+      startTime: Date.now(),
+    };
+
+    // Emit operation start event
+    if (this.eventEmitter) {
+      this.eventEmitter.emit("operation:start", {
+        operation: operationName,
+        params,
+      });
+    }
+
     try {
-      return await withResilience(operation, resilienceOptions);
+      // Execute operation with middleware if available
+      const executeOperation = async (): Promise<T> => {
+        if (this.middlewareExecutor) {
+          return this.middlewareExecutor.execute(ctx, operation) as Promise<T>;
+        }
+        return operation();
+      };
+
+      const result = await withResilience(executeOperation, resilienceOptions);
+
+      // Emit operation complete event
+      if (this.eventEmitter) {
+        this.eventEmitter.emit("operation:complete", {
+          operation: operationName,
+          result,
+          duration: Date.now() - ctx.startTime,
+        });
+      }
+
+      return result;
     } catch (error) {
+      // Emit operation error event
+      if (this.eventEmitter && error instanceof Error) {
+        this.eventEmitter.emit("operation:error", {
+          operation: operationName,
+          error,
+        });
+
+        this.eventEmitter.emit("error", {
+          error,
+          context: {
+            operation: operationName,
+            params,
+            timestamp: Date.now(),
+          },
+        });
+      }
+
       // Wrap resilience errors with user-friendly messages
       if (error instanceof TimeoutError) {
         throw new Error(getErrorMessage("OPERATION_TIMEOUT"));
@@ -148,7 +226,7 @@ export class ESignature {
   async checkVersion(
     options?: Partial<ResilienceOptions>
   ): Promise<VersionInfo> {
-    return this.executeWithResilience(
+    const result = await this.executeWithResilience(
       "checkVersion",
       () =>
         new Promise((resolve, reject) => {
@@ -170,6 +248,16 @@ export class ESignature {
         }),
       options
     );
+
+    // Emit version checked event
+    if (this.eventEmitter && result) {
+      this.eventEmitter.emit("version:checked", {
+        major: (result as VersionInfo).major,
+        minor: (result as VersionInfo).minor,
+      });
+    }
+
+    return result as VersionInfo;
   }
 
   /**
@@ -302,7 +390,7 @@ export class ESignature {
     cert: Certificate,
     options?: Partial<ResilienceOptions>
   ): Promise<LoadKeyResult> {
-    return this.executeWithResilience(
+    const result = await this.executeWithResilience(
       "loadKey",
       () =>
         new Promise((resolve, reject) => {
@@ -331,8 +419,19 @@ export class ESignature {
           return false;
         }
         return options?.isRetryable ? options.isRetryable(error) : isTransientError(error);
-      }}
+      }},
+      [cert]
     );
+
+    // Emit certificate loaded event
+    if (this.eventEmitter && result) {
+      this.eventEmitter.emit("certificate:loaded", {
+        certificate: cert,
+        keyId: createKeyId((result as LoadKeyResult).id),
+      });
+    }
+
+    return result as LoadKeyResult;
   }
 
   /**
@@ -345,7 +444,12 @@ export class ESignature {
     content: string,
     options?: Partial<ResilienceOptions>
   ): Promise<SignPkcs7Result | string> {
-    return this.executeWithResilience(
+    // Emit sign start event
+    if (this.eventEmitter) {
+      this.eventEmitter.emit("sign:start", { data: content });
+    }
+
+    const result = await this.executeWithResilience(
       "createPkcs7",
       () =>
         new Promise((resolve, reject) => {
@@ -373,8 +477,17 @@ export class ESignature {
           return false;
         }
         return options?.isRetryable ? options.isRetryable(error) : isTransientError(error);
-      }}
+      }},
+      [keyId, content]
     );
+
+    // Emit sign complete event
+    if (this.eventEmitter && result) {
+      const signature = typeof result === "string" ? result : (result as SignPkcs7Result).pkcs7_64;
+      this.eventEmitter.emit("sign:complete", { signature });
+    }
+
+    return result as SignPkcs7Result | string;
   }
 
   /**

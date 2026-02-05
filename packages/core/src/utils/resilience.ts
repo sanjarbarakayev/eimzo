@@ -492,17 +492,18 @@ export function createCancellableDelay(ms: number): {
   promise: Promise<void>;
   cancel: () => void;
 } {
-  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  let timeoutId: number | null = null;
   let rejectFn: ((reason: Error) => void) | null = null;
 
   const promise = new Promise<void>((resolve, reject) => {
     rejectFn = reject;
-    timeoutId = setTimeout(resolve, ms);
+    // Using window.setTimeout for browser environment to get numeric ID
+    timeoutId = window.setTimeout(resolve, ms);
   });
 
   const cancel = () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
+    if (timeoutId !== null) {
+      window.clearTimeout(timeoutId);
       timeoutId = null;
     }
     if (rejectFn) {
