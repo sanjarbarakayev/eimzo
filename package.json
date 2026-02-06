@@ -2,6 +2,7 @@
   "name": "eimzo",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "description": "E-IMZO digital signature SDK for JavaScript frameworks",
   "repository": {
     "type": "git",
@@ -23,15 +24,42 @@
     "clean": "turbo clean && rm -rf node_modules",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "turbo build && changeset publish"
+    "release": "turbo build && changeset publish",
+    "docs:dev": "pnpm --filter @eimzo/docs dev",
+    "docs:build": "pnpm typedoc && pnpm --filter @eimzo/docs build",
+    "docs:preview": "pnpm --filter @eimzo/docs preview",
+    "playground:dev": "pnpm --filter @eimzo/playground dev",
+    "playground:build": "pnpm --filter @eimzo/playground build",
+    "typedoc": "typedoc",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "globals": "^17.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
     "turbo": "^2.0.0",
-    "typescript": "^5.3.0"
+    "typedoc": "^0.26.0",
+    "typedoc-plugin-markdown": "^4.0.0",
+    "typescript": "^5.3.0",
+    "typescript-eslint": "^8.54.0"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,yaml,yml}": [
+      "prettier --write"
+    ]
   }
 }
