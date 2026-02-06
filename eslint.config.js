@@ -27,66 +27,67 @@ export default antfu({
 }, {
   // Custom rules
   rules: {
-    // Relaxed rules for existing codebase
+    // === WARNINGS (should fix gradually) ===
     'no-console': 'warn',
-    'ts/explicit-function-return-type': 'off',
     'ts/no-explicit-any': 'warn',
-    'ts/strict-boolean-expressions': 'off',
+    'unused-imports/no-unused-vars': 'warn',
+
+    // === OFF (require type-checked linting setup) ===
     'ts/no-unsafe-assignment': 'off',
     'ts/no-unsafe-member-access': 'off',
     'ts/no-unsafe-argument': 'off',
     'ts/no-unsafe-return': 'off',
     'ts/no-unsafe-call': 'off',
-    'ts/no-use-before-define': 'off',
     'ts/no-unsafe-function-type': 'off',
-    'ts/no-empty-object-type': 'off',
-    'unused-imports/no-unused-vars': 'warn',
-    'antfu/no-top-level-await': 'off',
+    'prefer-promise-reject-errors': 'off',
+    'no-async-promise-executor': 'off',
 
-    // Allow control characters in regex (needed for binary data)
-    'no-control-regex': 'off',
-
-    // Relax import ordering for existing codebase
+    // === OFF (style preferences) ===
+    'ts/explicit-function-return-type': 'off',
+    'ts/strict-boolean-expressions': 'off',
     'perfectionist/sort-imports': 'off',
     'perfectionist/sort-named-imports': 'off',
     'perfectionist/sort-named-exports': 'off',
     'import/consistent-type-specifier-style': 'off',
-
-    // Relax JSDoc requirements
     'jsdoc/check-param-names': 'off',
-
-    // Test-specific rules
     'test/prefer-lowercase-title': 'off',
+    'style/indent-binary-ops': 'off',
+    'antfu/no-top-level-await': 'off',
 
-    // Node.js specific
-    'node/handle-callback-err': 'off',
-    'node/prefer-global/process': 'off',
-    'node/prefer-global/buffer': 'off',
-
-    // Promise handling
-    'prefer-promise-reject-errors': 'off',
-    'no-async-promise-executor': 'off',
-
-    // Regex patterns (UTF-8 handling in binary data)
+    // === OFF (legitimate technical reasons) ===
+    // Binary data handling requires control characters
+    'no-control-regex': 'off',
     'regexp/no-obscure-range': 'off',
 
-    // Native prototype extension (used in existing code)
+    // Legacy Utf8 class extends String prototype
     'no-extend-native': 'off',
 
-    // Assignment in conditions (used in while loops)
+    // Common pattern: while ((match = regex.exec(str)))
     'no-cond-assign': 'off',
 
-    // Binary operator indentation
-    'style/indent-binary-ops': 'off',
+    // Standard Node.js globals
+    'node/prefer-global/process': 'off',
+    'node/prefer-global/buffer': 'off',
+    'node/handle-callback-err': 'off',
+
+    // Empty object type used in Vue component definitions
+    'ts/no-empty-object-type': 'off',
+
+    // Function hoisting is valid JavaScript
+    'ts/no-use-before-define': 'off',
   },
 }, {
-  // Test files can be more relaxed
+  // Test files - more relaxed
   files: ['**/*.test.ts', '**/__tests__/**/*.ts'],
   rules: {
     'ts/no-explicit-any': 'off',
     'ts/no-unsafe-assignment': 'off',
     'ts/no-unsafe-member-access': 'off',
     'ts/no-unsafe-argument': 'off',
+    'ts/no-unsafe-return': 'off',
+    'ts/no-unsafe-call': 'off',
     'unused-imports/no-unused-vars': 'off',
+    'no-async-promise-executor': 'off',
+    'prefer-promise-reject-errors': 'off',
   },
 })

@@ -297,7 +297,7 @@ export const EIMZOClient: IEIMZOClient = {
 
   idCardIsPLuggedIn(success: BooleanSuccessCallback, fail: FailCallback): void {
     if (!EIMZOClient.NEW_API2) {
-      console.log('E-IMZO version should be 4.12 or newer')
+      console.warn('E-IMZO version should be 4.12 or newer')
       success(false)
       return
     }
@@ -323,7 +323,7 @@ export const EIMZOClient: IEIMZOClient = {
     fail: FailCallback,
   ): void {
     if (!EIMZOClient.NEW_API3) {
-      console.log('E-IMZO version should be 4.86 or newer')
+      console.warn('E-IMZO version should be 4.86 or newer')
       success(false)
       return
     }
@@ -346,7 +346,7 @@ export const EIMZOClient: IEIMZOClient = {
 
   isCKCPLuggedIn(success: BooleanSuccessCallback, fail: FailCallback): void {
     if (!EIMZOClient.NEW_API3) {
-      console.log('E-IMZO version should be 4.86 or newer')
+      console.warn('E-IMZO version should be 4.86 or newer')
       success(false)
       return
     }

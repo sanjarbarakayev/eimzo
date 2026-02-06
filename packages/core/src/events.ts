@@ -61,6 +61,7 @@ type EventHandler<T> = (data: T) => void
  * ```
  */
 export class EIMZOEventEmitter {
+  // eslint-disable-next-line ts/no-explicit-any -- internal storage for heterogeneous handlers
   private listeners: Map<keyof EIMZOEvents, Set<EventHandler<any>>> = new Map()
 
   /**

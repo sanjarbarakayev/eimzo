@@ -575,7 +575,7 @@ export interface ESignatureOptions {
   /** Callback fired before each retry attempt */
   onRetry?: (operation: string, attempt: number, error: Error) => void
   /** Middleware functions to intercept operations */
-  middleware?: Array<(ctx: any, next: () => Promise<unknown>) => Promise<unknown>>
+  middleware?: Array<(ctx: { operation: string, params: unknown[], metadata: Record<string, unknown>, startTime: number }, next: () => Promise<unknown>) => Promise<unknown>>
   /** Enable event emitter (default: false) */
   enableEvents?: boolean
 }

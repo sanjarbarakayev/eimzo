@@ -59,8 +59,8 @@ export default defineComponent({
   },
 
   emits: {
-    error: (error: EIMZOError) => true,
-    retry: (retryCount: number) => true,
+    error: (_error: EIMZOError) => true,
+    retry: (_retryCount: number) => true,
     reset: () => true,
   },
 

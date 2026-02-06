@@ -117,7 +117,7 @@ export class RecoveryExecutor {
             continue
           }
         }
-        catch (strategyError) {
+        catch {
           // Strategy threw an error, try next strategy
           continue
         }
