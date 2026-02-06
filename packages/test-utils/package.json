@@ -1,5 +1,6 @@
 {
   "name": "@eimzo/test-utils",
+  "type": "module",
   "version": "1.0.0",
   "description": "Testing utilities for E-IMZO SDK",
   "author": "Sanjar Barakayev",
@@ -9,10 +10,7 @@
     "url": "git+https://github.com/sanjarbarakayev/eimzo.git",
     "directory": "packages/test-utils"
   },
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
       "import": {
@@ -25,10 +23,15 @@
       }
     }
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
-  "sideEffects": false,
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -42,8 +45,5 @@
     "@types/node": "^20.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }

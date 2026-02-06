@@ -1,16 +1,16 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
-  TimeoutError,
-  RetryExhaustedError,
-  classifyError,
-  isTransientError,
   calculateBackoffDelay,
-  withTimeout,
-  withRetry,
-  withResilience,
-  isTimeoutError,
-  isRetryExhaustedError,
+  classifyError,
   DEFAULT_RESILIENCE_OPTIONS,
+  isRetryExhaustedError,
+  isTimeoutError,
+  isTransientError,
+  RetryExhaustedError,
+  TimeoutError,
+  withResilience,
+  withRetry,
+  withTimeout,
 } from '../utils/resilience'
 
 describe('resilience utilities', () => {
@@ -22,7 +22,7 @@ describe('resilience utilities', () => {
     vi.useRealTimers()
   })
 
-  describe('TimeoutError', () => {
+  describe('timeoutError', () => {
     it('should create TimeoutError with message and timeout', () => {
       const error = new TimeoutError('Test timeout', 5000)
       expect(error.message).toBe('Test timeout')
@@ -37,7 +37,7 @@ describe('resilience utilities', () => {
     })
   })
 
-  describe('RetryExhaustedError', () => {
+  describe('retryExhaustedError', () => {
     it('should create RetryExhaustedError with message, attempts, and lastError', () => {
       const lastError = new Error('Original error')
       const error = new RetryExhaustedError('Retries exhausted', 3, lastError)
@@ -161,7 +161,7 @@ describe('resilience utilities', () => {
     it('should reject with TimeoutError when operation exceeds timeout', async () => {
       const operation = vi
         .fn()
-        .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 5000)))
+        .mockImplementation(() => new Promise(resolve => setTimeout(resolve, 5000)))
 
       const resultPromise = withTimeout(operation, { timeout: 1000 })
 
@@ -175,7 +175,7 @@ describe('resilience utilities', () => {
     it('should use custom timeout message', async () => {
       const operation = vi
         .fn()
-        .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 5000)))
+        .mockImplementation(() => new Promise(resolve => setTimeout(resolve, 5000)))
 
       const resultPromise = withTimeout(operation, {
         timeout: 1000,
@@ -236,7 +236,7 @@ describe('resilience utilities', () => {
       const operation = vi.fn().mockRejectedValue(new Error('Network error'))
 
       await expect(
-        withRetry(operation, { maxRetries: 2, baseDelay: 10, maxDelay: 50 })
+        withRetry(operation, { maxRetries: 2, baseDelay: 10, maxDelay: 50 }),
       ).rejects.toThrow(RetryExhaustedError)
 
       expect(operation).toHaveBeenCalledTimes(3) // Initial + 2 retries
@@ -269,7 +269,7 @@ describe('resilience utilities', () => {
       const isRetryable = vi.fn().mockReturnValue(false)
 
       await expect(withRetry(operation, { maxRetries: 3, isRetryable })).rejects.toThrow(
-        'Custom error'
+        'Custom error',
       )
 
       expect(isRetryable).toHaveBeenCalledWith(expect.any(Error))
@@ -301,7 +301,7 @@ describe('resilience utilities', () => {
       const operation = vi.fn().mockRejectedValue(new Error('Network error'))
 
       await expect(withResilience(operation, { enableRetry: false })).rejects.toThrow(
-        'Network error'
+        'Network error',
       )
 
       expect(operation).toHaveBeenCalledTimes(1)
@@ -311,7 +311,7 @@ describe('resilience utilities', () => {
       const operation = vi
         .fn()
         .mockImplementation(
-          () => new Promise((resolve) => setTimeout(() => resolve('success'), 5000))
+          () => new Promise(resolve => setTimeout(() => resolve('success'), 5000)),
         )
 
       const resultPromise = withResilience(operation, {
@@ -349,7 +349,7 @@ describe('resilience utilities', () => {
     })
   })
 
-  describe('DEFAULT_RESILIENCE_OPTIONS', () => {
+  describe('dEFAULT_RESILIENCE_OPTIONS', () => {
     it('should have sensible defaults', () => {
       expect(DEFAULT_RESILIENCE_OPTIONS.timeout).toBe(30000)
       expect(DEFAULT_RESILIENCE_OPTIONS.maxRetries).toBe(3)

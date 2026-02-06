@@ -25,10 +25,10 @@ export class BrandedTypeError extends Error {
   constructor(
     public readonly typeName: string,
     public readonly value: unknown,
-    message: string
+    message: string,
   ) {
-    super(message);
-    this.name = 'BrandedTypeError';
+    super(message)
+    this.name = 'BrandedTypeError'
   }
 }
 
@@ -53,10 +53,10 @@ export class BrandedTypeError extends Error {
  */
 export class KeyId {
   /** Private field creates true nominal typing */
-  readonly #value: string;
+  readonly #value: string
 
   private constructor(value: string) {
-    this.#value = value;
+    this.#value = value
   }
 
   /**
@@ -71,10 +71,10 @@ export class KeyId {
       throw new BrandedTypeError(
         'KeyId',
         id,
-        'KeyId must be a non-empty string'
-      );
+        'KeyId must be a non-empty string',
+      )
     }
-    return new KeyId(id);
+    return new KeyId(id)
   }
 
   /**
@@ -85,9 +85,9 @@ export class KeyId {
    */
   static tryCreate(id: string): KeyId | null {
     if (!KeyId.isValid(id)) {
-      return null;
+      return null
     }
-    return new KeyId(id);
+    return new KeyId(id)
   }
 
   /**
@@ -97,7 +97,7 @@ export class KeyId {
    * @returns True if value is valid for KeyId creation
    */
   static isValid(value: unknown): value is string {
-    return typeof value === 'string' && value.length > 0;
+    return typeof value === 'string' && value.length > 0
   }
 
   /**
@@ -107,35 +107,35 @@ export class KeyId {
    * @returns True if value is a KeyId instance
    */
   static isKeyId(value: unknown): value is KeyId {
-    return value instanceof KeyId;
+    return value instanceof KeyId
   }
 
   /**
    * Returns the underlying string value
    */
   toString(): string {
-    return this.#value;
+    return this.#value
   }
 
   /**
    * Returns the underlying string value (for implicit conversion)
    */
   valueOf(): string {
-    return this.#value;
+    return this.#value
   }
 
   /**
    * Returns the underlying string value (for JSON serialization)
    */
   toJSON(): string {
-    return this.#value;
+    return this.#value
   }
 
   /**
    * Compares equality with another KeyId
    */
   equals(other: KeyId): boolean {
-    return this.#value === other.#value;
+    return this.#value === other.#value
   }
 }
 
@@ -156,14 +156,14 @@ export class KeyId {
  */
 export class CertificateId {
   /** Private field creates true nominal typing */
-  readonly #value: string;
-  readonly #serialNumber: string;
-  readonly #index: number;
+  readonly #value: string
+  readonly #serialNumber: string
+  readonly #index: number
 
   private constructor(serialNumber: string, index: number) {
-    this.#serialNumber = serialNumber;
-    this.#index = index;
-    this.#value = `${serialNumber}:${index}`;
+    this.#serialNumber = serialNumber
+    this.#index = index
+    this.#value = `${serialNumber}:${index}`
   }
 
   /**
@@ -175,16 +175,16 @@ export class CertificateId {
    * @throws BrandedTypeError if inputs are invalid
    */
   static create(serialNumber: string, index: string | number): CertificateId {
-    const numIndex = typeof index === 'string' ? parseInt(index, 10) : index;
+    const numIndex = typeof index === 'string' ? Number.parseInt(index, 10) : index
 
     if (!CertificateId.isValidComponents(serialNumber, numIndex)) {
       throw new BrandedTypeError(
         'CertificateId',
         { serialNumber, index },
-        'CertificateId requires non-empty serialNumber and non-negative integer index'
-      );
+        'CertificateId requires non-empty serialNumber and non-negative integer index',
+      )
     }
-    return new CertificateId(serialNumber, numIndex);
+    return new CertificateId(serialNumber, numIndex)
   }
 
   /**
@@ -196,14 +196,14 @@ export class CertificateId {
    */
   static tryCreate(
     serialNumber: string,
-    index: string | number
+    index: string | number,
   ): CertificateId | null {
-    const numIndex = typeof index === 'string' ? parseInt(index, 10) : index;
+    const numIndex = typeof index === 'string' ? Number.parseInt(index, 10) : index
 
     if (!CertificateId.isValidComponents(serialNumber, numIndex)) {
-      return null;
+      return null
     }
-    return new CertificateId(serialNumber, numIndex);
+    return new CertificateId(serialNumber, numIndex)
   }
 
   /**
@@ -214,15 +214,15 @@ export class CertificateId {
    * @throws BrandedTypeError if format is invalid
    */
   static fromString(value: string): CertificateId {
-    const parsed = CertificateId.tryFromString(value);
+    const parsed = CertificateId.tryFromString(value)
     if (!parsed) {
       throw new BrandedTypeError(
         'CertificateId',
         value,
-        'CertificateId must be in format "serialNumber:index"'
-      );
+        'CertificateId must be in format "serialNumber:index"',
+      )
     }
-    return parsed;
+    return parsed
   }
 
   /**
@@ -233,18 +233,18 @@ export class CertificateId {
    */
   static tryFromString(value: string): CertificateId | null {
     if (typeof value !== 'string' || value.length === 0) {
-      return null;
+      return null
     }
-    const parts = value.split(':');
+    const parts = value.split(':')
     if (parts.length !== 2) {
-      return null;
+      return null
     }
-    const [serialNumber, indexStr] = parts;
+    const [serialNumber, indexStr] = parts
     if (!serialNumber || !/^\d+$/.test(indexStr)) {
-      return null;
+      return null
     }
-    const index = parseInt(indexStr, 10);
-    return new CertificateId(serialNumber, index);
+    const index = Number.parseInt(indexStr, 10)
+    return new CertificateId(serialNumber, index)
   }
 
   /**
@@ -252,74 +252,74 @@ export class CertificateId {
    */
   private static isValidComponents(
     serialNumber: unknown,
-    index: unknown
+    index: unknown,
   ): boolean {
     return (
-      typeof serialNumber === 'string' &&
-      serialNumber.length > 0 &&
-      typeof index === 'number' &&
-      Number.isInteger(index) &&
-      index >= 0
-    );
+      typeof serialNumber === 'string'
+      && serialNumber.length > 0
+      && typeof index === 'number'
+      && Number.isInteger(index)
+      && index >= 0
+    )
   }
 
   /**
    * Type guard to check if a value is a CertificateId instance
    */
   static isCertificateId(value: unknown): value is CertificateId {
-    return value instanceof CertificateId;
+    return value instanceof CertificateId
   }
 
   /**
    * Returns the underlying string value
    */
   toString(): string {
-    return this.#value;
+    return this.#value
   }
 
   /**
    * Returns the underlying string value (for implicit conversion)
    */
   valueOf(): string {
-    return this.#value;
+    return this.#value
   }
 
   /**
    * Returns the underlying string value (for JSON serialization)
    */
   toJSON(): string {
-    return this.#value;
+    return this.#value
   }
 
   /**
    * Returns the parsed components
    */
-  parse(): { serialNumber: string; index: number } {
+  parse(): { serialNumber: string, index: number } {
     return {
       serialNumber: this.#serialNumber,
       index: this.#index,
-    };
+    }
   }
 
   /**
    * Returns the serial number component
    */
   get serialNumber(): string {
-    return this.#serialNumber;
+    return this.#serialNumber
   }
 
   /**
    * Returns the index component
    */
   get index(): number {
-    return this.#index;
+    return this.#index
   }
 
   /**
    * Compares equality with another CertificateId
    */
   equals(other: CertificateId): boolean {
-    return this.#value === other.#value;
+    return this.#value === other.#value
   }
 }
 
@@ -332,7 +332,7 @@ export class CertificateId {
  * @deprecated Use KeyId.create() instead
  */
 export function createKeyId(id: string): KeyId {
-  return KeyId.create(id);
+  return KeyId.create(id)
 }
 
 /**
@@ -341,9 +341,9 @@ export function createKeyId(id: string): KeyId {
  */
 export function createCertificateId(
   serialNumber: string,
-  index: string | number
+  index: string | number,
 ): CertificateId {
-  return CertificateId.create(serialNumber, index);
+  return CertificateId.create(serialNumber, index)
 }
 
 /**
@@ -351,7 +351,7 @@ export function createCertificateId(
  * @deprecated Use KeyId.isKeyId() instead
  */
 export function isValidKeyId(value: unknown): value is KeyId {
-  return KeyId.isKeyId(value);
+  return KeyId.isKeyId(value)
 }
 
 /**
@@ -359,7 +359,7 @@ export function isValidKeyId(value: unknown): value is KeyId {
  * @deprecated Use CertificateId.isCertificateId() instead
  */
 export function isValidCertificateId(value: unknown): value is CertificateId {
-  return CertificateId.isCertificateId(value);
+  return CertificateId.isCertificateId(value)
 }
 
 /**
@@ -367,7 +367,7 @@ export function isValidCertificateId(value: unknown): value is CertificateId {
  * @deprecated Use .toString() method instead
  */
 export function unwrapBrand(branded: KeyId | CertificateId): string {
-  return branded.toString();
+  return branded.toString()
 }
 
 /**
@@ -375,7 +375,7 @@ export function unwrapBrand(branded: KeyId | CertificateId): string {
  * @deprecated Use CertificateId.parse() method instead
  */
 export function parseCertificateId(
-  certId: CertificateId
-): { serialNumber: string; index: number } {
-  return certId.parse();
+  certId: CertificateId,
+): { serialNumber: string, index: number } {
+  return certId.parse()
 }

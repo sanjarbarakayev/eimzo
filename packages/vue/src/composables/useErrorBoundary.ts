@@ -15,11 +15,12 @@
  * ```
  */
 
-import { inject } from 'vue';
+import type { ErrorBoundaryContext } from '../components/error-boundary-types'
+import { inject } from 'vue'
 import {
   ERROR_BOUNDARY_KEY,
-  type ErrorBoundaryContext,
-} from '../components/error-boundary-types';
+
+} from '../components/error-boundary-types'
 
 /**
  * Injects the nearest error boundary context
@@ -27,5 +28,5 @@ import {
  * @returns ErrorBoundaryContext if inside an ESignatureErrorBoundary, null otherwise
  */
 export function useErrorBoundary(): ErrorBoundaryContext | null {
-  return inject(ERROR_BOUNDARY_KEY, null);
+  return inject(ERROR_BOUNDARY_KEY, null)
 }

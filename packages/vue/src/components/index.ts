@@ -4,10 +4,10 @@
  * Re-exports all Vue components for E-IMZO SDK.
  */
 
-export { default as ESignatureErrorBoundary } from './ESignatureErrorBoundary.vue';
 export {
   ERROR_BOUNDARY_KEY,
-  type ErrorBoundarySlotProps,
   type ErrorBoundaryContext,
+  type ErrorBoundarySlotProps,
   type ESignatureErrorBoundaryProps,
-} from './error-boundary-types';
+} from './error-boundary-types'
+export { default as ESignatureErrorBoundary } from './ESignatureErrorBoundary.vue'

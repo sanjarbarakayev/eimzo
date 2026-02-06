@@ -12,9 +12,10 @@
  * ```
  */
 
-import type { EIMZOError } from '../errors/eimzo-error';
-import { ERROR_CODES, type ErrorCode, isConnectionErrorCode, isCertificateErrorCode, isApplicationErrorCode } from '../types/error-codes';
-import type { RecoveryStrategy, RecoveryContext, RecoveryResult } from './types';
+import type { EIMZOError } from '../errors/eimzo-error'
+import type { ErrorCode } from '../types/error-codes'
+import type { RecoveryContext, RecoveryResult, RecoveryStrategy } from './types'
+import { ERROR_CODES, isApplicationErrorCode, isCertificateErrorCode, isConnectionErrorCode } from '../types/error-codes'
 
 // ============================================================================
 // Reconnect Strategy
@@ -29,18 +30,18 @@ export const reconnectStrategy: RecoveryStrategy = {
   priority: 100,
 
   canRecover(error: EIMZOError): boolean {
-    return isConnectionErrorCode(error.code) && error.code !== ERROR_CODES.WEBSOCKET_NOT_SUPPORTED;
+    return isConnectionErrorCode(error.code) && error.code !== ERROR_CODES.WEBSOCKET_NOT_SUPPORTED
   },
 
   async recover(context: RecoveryContext): Promise<RecoveryResult> {
-    const { client, attempt, maxAttempts } = context;
+    const { client, attempt, maxAttempts } = context
 
     if (!client.reconnect) {
       return {
         recovered: false,
         shouldRetryOperation: false,
         message: 'Client does not support reconnection',
-      };
+      }
     }
 
     // Check if already connected
@@ -49,26 +50,27 @@ export const reconnectStrategy: RecoveryStrategy = {
         recovered: true,
         shouldRetryOperation: true,
         message: 'Already connected',
-      };
+      }
     }
 
     try {
-      await client.reconnect();
+      await client.reconnect()
 
       return {
         recovered: true,
         shouldRetryOperation: true,
         message: `Reconnected successfully on attempt ${attempt}/${maxAttempts}`,
-      };
-    } catch (reconnectError) {
+      }
+    }
+    catch (reconnectError) {
       return {
         recovered: false,
         shouldRetryOperation: false,
         message: `Reconnection failed: ${reconnectError instanceof Error ? reconnectError.message : String(reconnectError)}`,
-      };
+      }
     }
   },
-};
+}
 
 // ============================================================================
 // Certificate Refresh Strategy
@@ -83,18 +85,18 @@ export const certificateRefreshStrategy: RecoveryStrategy = {
   priority: 90,
 
   canRecover(error: EIMZOError): boolean {
-    return isCertificateErrorCode(error.code);
+    return isCertificateErrorCode(error.code)
   },
 
   async recover(context: RecoveryContext): Promise<RecoveryResult> {
-    const { client, error } = context;
+    const { client, error } = context
 
     if (!client.refreshCertificates) {
       return {
         recovered: false,
         shouldRetryOperation: false,
         message: 'Client does not support certificate refresh',
-      };
+      }
     }
 
     // Certificate expired is not recoverable by refresh alone
@@ -104,7 +106,7 @@ export const certificateRefreshStrategy: RecoveryStrategy = {
         recovered: false,
         shouldRetryOperation: false,
         message: 'Certificate has expired. User must renew their certificate.',
-      };
+      }
     }
 
     // Certificate not yet valid - wait and retry
@@ -113,26 +115,27 @@ export const certificateRefreshStrategy: RecoveryStrategy = {
         recovered: false,
         shouldRetryOperation: true,
         message: 'Certificate is not yet valid. Retry later.',
-      };
+      }
     }
 
     try {
-      await client.refreshCertificates();
+      await client.refreshCertificates()
 
       return {
         recovered: true,
         shouldRetryOperation: true,
         message: 'Certificates refreshed successfully',
-      };
-    } catch (refreshError) {
+      }
+    }
+    catch (refreshError) {
       return {
         recovered: false,
         shouldRetryOperation: false,
         message: `Certificate refresh failed: ${refreshError instanceof Error ? refreshError.message : String(refreshError)}`,
-      };
+      }
     }
   },
-};
+}
 
 // ============================================================================
 // Version Check Strategy
@@ -147,11 +150,11 @@ export const versionCheckStrategy: RecoveryStrategy = {
   priority: 80,
 
   canRecover(error: EIMZOError): boolean {
-    return isApplicationErrorCode(error.code);
+    return isApplicationErrorCode(error.code)
   },
 
   async recover(context: RecoveryContext): Promise<RecoveryResult> {
-    const { client, error } = context;
+    const { client, error } = context
 
     // These errors are not recoverable - user action required
     if (error.code === ERROR_CODES.EIMZO_NOT_INSTALLED) {
@@ -159,7 +162,7 @@ export const versionCheckStrategy: RecoveryStrategy = {
         recovered: false,
         shouldRetryOperation: false,
         message: 'E-IMZO application is not installed. User must install E-IMZO.',
-      };
+      }
     }
 
     if (error.code === ERROR_CODES.VERSION_OUTDATED) {
@@ -167,7 +170,7 @@ export const versionCheckStrategy: RecoveryStrategy = {
         recovered: false,
         shouldRetryOperation: false,
         message: 'E-IMZO version is outdated. User must update E-IMZO.',
-      };
+      }
     }
 
     if (!client.checkVersion) {
@@ -175,27 +178,28 @@ export const versionCheckStrategy: RecoveryStrategy = {
         recovered: false,
         shouldRetryOperation: false,
         message: 'Client does not support version check',
-      };
+      }
     }
 
     try {
-      const version = await client.checkVersion();
+      const version = await client.checkVersion()
 
       // Version was retrieved, retry the operation
       return {
         recovered: true,
         shouldRetryOperation: true,
         message: `E-IMZO version detected: ${version}`,
-      };
-    } catch (versionError) {
+      }
+    }
+    catch (versionError) {
       return {
         recovered: false,
         shouldRetryOperation: false,
         message: `Version check failed: ${versionError instanceof Error ? versionError.message : String(versionError)}`,
-      };
+      }
     }
   },
-};
+}
 
 // ============================================================================
 // Default Strategies Collection
@@ -208,7 +212,7 @@ export const DEFAULT_RECOVERY_STRATEGIES: readonly RecoveryStrategy[] = [
   reconnectStrategy,
   certificateRefreshStrategy,
   versionCheckStrategy,
-].sort((a, b) => b.priority - a.priority);
+].sort((a, b) => b.priority - a.priority)
 
 // ============================================================================
 // Strategy Creation Helper
@@ -234,21 +238,21 @@ export const DEFAULT_RECOVERY_STRATEGIES: readonly RecoveryStrategy[] = [
  * ```
  */
 export function createStrategy(config: {
-  name: string;
-  handles: readonly ErrorCode[];
-  priority?: number;
-  canRecover?: (error: EIMZOError) => boolean;
-  recover: (context: RecoveryContext) => Promise<RecoveryResult>;
+  name: string
+  handles: readonly ErrorCode[]
+  priority?: number
+  canRecover?: (error: EIMZOError) => boolean
+  recover: (context: RecoveryContext) => Promise<RecoveryResult>
 }): RecoveryStrategy {
-  const handles = config.handles;
+  const handles = config.handles
 
   return {
     name: config.name,
     handles,
     priority: config.priority ?? 50,
     canRecover:
-      config.canRecover ??
-      ((error: EIMZOError) => (handles as readonly ErrorCode[]).includes(error.code)),
+      config.canRecover
+      ?? ((error: EIMZOError) => (handles as readonly ErrorCode[]).includes(error.code)),
     recover: config.recover,
-  };
+  }
 }

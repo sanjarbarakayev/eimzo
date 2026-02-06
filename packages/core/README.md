@@ -11,7 +11,7 @@ npm install @eimzo/core
 ## Usage
 
 ```typescript
-import { EIMZOClient, CAPIWS, detectEIMZO } from '@eimzo/core'
+import { CAPIWS, detectEIMZO, EIMZOClient } from '@eimzo/core'
 
 // Check if E-IMZO is installed
 const status = await detectEIMZO()
@@ -41,7 +41,7 @@ const result = EIMZOMobile.generateQRCodeData('siteId', 'docNumber', 'content')
 ### Internationalization
 
 ```typescript
-import { setLocale, getErrorMessage } from '@eimzo/core/i18n'
+import { getErrorMessage, setLocale } from '@eimzo/core/i18n'
 
 setLocale('uz')
 console.log(getErrorMessage('WRONG_PASSWORD'))

@@ -7,94 +7,101 @@
   Source: https://github.com/sanjarbarakayev/vue-esignature/tree/main/examples/components
 -->
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import type { EIMZOStatus } from '@eimzo/vue'
 import {
   detectEIMZO,
+
   getEIMZODownloadUrl,
-  type EIMZOStatus,
-} from "@eimzo/vue";
+} from '@eimzo/vue'
+import { computed, onMounted, ref } from 'vue'
 
 const props = withDefaults(
   defineProps<{
     /** Auto-check on mount */
-    autoCheck?: boolean;
+    autoCheck?: boolean
     /** Show compact version */
-    compact?: boolean;
+    compact?: boolean
     /** Custom title */
-    title?: string;
+    title?: string
   }>(),
   {
     autoCheck: true,
     compact: false,
-    title: "E-IMZO Required",
-  }
-);
+    title: 'E-IMZO Required',
+  },
+)
 
 const emit = defineEmits<{
-  detected: [];
-  checkAgain: [];
-}>();
+  detected: []
+  checkAgain: []
+}>()
 
-type CheckState = "checking" | "installed" | "not-installed" | "no-websocket";
+type CheckState = 'checking' | 'installed' | 'not-installed' | 'no-websocket'
 
-const state = ref<CheckState>("checking");
-const status = ref<EIMZOStatus | null>(null);
+const state = ref<CheckState>('checking')
+const status = ref<EIMZOStatus | null>(null)
 
-const downloadUrl = computed(() => getEIMZODownloadUrl());
+const downloadUrl = computed(() => getEIMZODownloadUrl())
 
 const platform = computed(() => {
-  const ua = navigator.userAgent.toLowerCase();
-  if (ua.includes("win")) return "windows";
-  if (ua.includes("mac")) return "macos";
-  if (ua.includes("linux")) return "linux";
-  return "other";
-});
+  const ua = navigator.userAgent.toLowerCase()
+  if (ua.includes('win'))
+    return 'windows'
+  if (ua.includes('mac'))
+    return 'macos'
+  if (ua.includes('linux'))
+    return 'linux'
+  return 'other'
+})
 
 const platformIcon = computed(() => {
   switch (platform.value) {
-    case "windows":
-      return "Windows";
-    case "macos":
-      return "macOS";
-    case "linux":
-      return "Linux";
+    case 'windows':
+      return 'Windows'
+    case 'macos':
+      return 'macOS'
+    case 'linux':
+      return 'Linux'
     default:
-      return "Desktop";
+      return 'Desktop'
   }
-});
+})
 
 async function checkInstallation() {
-  state.value = "checking";
-  emit("checkAgain");
+  state.value = 'checking'
+  emit('checkAgain')
 
   try {
-    const result = await detectEIMZO();
-    status.value = result;
+    const result = await detectEIMZO()
+    status.value = result
 
     if (!result.browserSupported) {
-      state.value = "no-websocket";
-    } else if (result.isRunning) {
-      state.value = "installed";
-      emit("detected");
-    } else {
-      state.value = "not-installed";
+      state.value = 'no-websocket'
     }
-  } catch {
-    state.value = "not-installed";
+    else if (result.isRunning) {
+      state.value = 'installed'
+      emit('detected')
+    }
+    else {
+      state.value = 'not-installed'
+    }
+  }
+  catch {
+    state.value = 'not-installed'
   }
 }
 
 function openDownload() {
-  window.open(downloadUrl.value, "_blank");
+  window.open(downloadUrl.value, '_blank')
 }
 
 onMounted(() => {
   if (props.autoCheck) {
-    checkInstallation();
+    checkInstallation()
   }
-});
+})
 
-defineExpose({ checkInstallation, status });
+defineExpose({ checkInstallation, status })
 </script>
 
 <template>
@@ -102,7 +109,7 @@ defineExpose({ checkInstallation, status });
     <!-- Checking state -->
     <div v-if="state === 'checking'" class="state-content checking">
       <div class="spinner-container">
-        <div class="spinner"></div>
+        <div class="spinner" />
       </div>
       <p>Checking for E-IMZO...</p>
     </div>

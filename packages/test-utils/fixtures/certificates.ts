@@ -1,4 +1,4 @@
-import type { PfxCertificate, FtjcCertificate } from '@eimzo/core'
+import type { FtjcCertificate, PfxCertificate } from '@eimzo/core'
 
 /**
  * Mock PFX certificate for testing
@@ -83,7 +83,7 @@ export function createMockPfxCertificate(overrides: Partial<PfxCertificate> = {}
  * Create a mock FTJC certificate with custom properties
  */
 export function createMockFtjcCertificate(
-  overrides: Partial<FtjcCertificate> = {}
+  overrides: Partial<FtjcCertificate> = {},
 ): FtjcCertificate {
   return {
     ...mockFtjcCertificate,
@@ -100,6 +100,5 @@ export function createMockCertificateList(count: number = 3): PfxCertificate[] {
       serialNumber: `CERT-${i + 1}`,
       CN: `Test User ${i + 1}`,
       name: `cert-${i + 1}.pfx`,
-    })
-  )
+    }))
 }

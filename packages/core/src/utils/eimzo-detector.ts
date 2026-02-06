@@ -10,34 +10,35 @@
  */
 export interface EIMZOStatus {
   /** Whether E-IMZO software is installed and responding */
-  isInstalled: boolean;
+  isInstalled: boolean
   /** Whether E-IMZO service is currently running */
-  isRunning: boolean;
+  isRunning: boolean
   /** The port E-IMZO is responding on (64443 or 64646), or null if not detected */
-  port: number | null;
+  port: number | null
   /** Whether the current browser supports WebSocket */
-  browserSupported: boolean;
+  browserSupported: boolean
 }
 
 /** E-IMZO WebSocket path */
-const EIMZO_PATH = "/service/cryptapi";
+const EIMZO_PATH = '/service/cryptapi'
 
 /** Timeout for connection attempts (ms) */
-const CONNECTION_TIMEOUT = 2000;
+const CONNECTION_TIMEOUT = 2000
 
 /**
  * Check if WebSocket is supported in the current browser
  */
 function checkBrowserSupport(): boolean {
-  return typeof WebSocket !== "undefined";
+  return typeof WebSocket !== 'undefined'
 }
 
 /**
  * Check if the current page is served over HTTPS
  */
 function isSecureContext(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.location.protocol.toLowerCase() === "https:";
+  if (typeof window === 'undefined')
+    return false
+  return window.location.protocol.toLowerCase() === 'https:'
 }
 
 /**
@@ -45,11 +46,11 @@ function isSecureContext(): boolean {
  * - HTTPS pages must use WSS (port 64443)
  * - HTTP pages must use WS (port 64646)
  */
-function getWebSocketConfig(): { protocol: string; port: number } {
+function getWebSocketConfig(): { protocol: string, port: number } {
   if (isSecureContext()) {
-    return { protocol: "wss", port: 64443 };
+    return { protocol: 'wss', port: 64443 }
   }
-  return { protocol: "ws", port: 64646 };
+  return { protocol: 'ws', port: 64646 }
 }
 
 /**
@@ -57,94 +58,96 @@ function getWebSocketConfig(): { protocol: string; port: number } {
  */
 function tryConnect(
   protocol: string,
-  port: number
-): Promise<{ success: boolean; port: number }> {
+  port: number,
+): Promise<{ success: boolean, port: number }> {
   return new Promise((resolve) => {
     if (!checkBrowserSupport()) {
-      resolve({ success: false, port });
-      return;
+      resolve({ success: false, port })
+      return
     }
 
-    const url = `${protocol}://127.0.0.1:${port}${EIMZO_PATH}`;
+    const url = `${protocol}://127.0.0.1:${port}${EIMZO_PATH}`
 
-    let resolved = false;
-    let ws: WebSocket | null = null;
+    let resolved = false
+    let ws: WebSocket | null = null
 
     const cleanup = () => {
       if (ws) {
-        ws.onopen = null;
-        ws.onerror = null;
-        ws.onclose = null;
-        ws.onmessage = null;
+        ws.onopen = null
+        ws.onerror = null
+        ws.onclose = null
+        ws.onmessage = null
         if (
-          ws.readyState === WebSocket.OPEN ||
-          ws.readyState === WebSocket.CONNECTING
+          ws.readyState === WebSocket.OPEN
+          || ws.readyState === WebSocket.CONNECTING
         ) {
-          ws.close();
+          ws.close()
         }
-        ws = null;
+        ws = null
       }
-    };
+    }
 
     const timeout = setTimeout(() => {
       if (!resolved) {
-        resolved = true;
-        cleanup();
-        resolve({ success: false, port });
+        resolved = true
+        cleanup()
+        resolve({ success: false, port })
       }
-    }, CONNECTION_TIMEOUT);
+    }, CONNECTION_TIMEOUT)
 
     try {
-      ws = new WebSocket(url);
+      ws = new WebSocket(url)
 
       ws.onopen = () => {
         if (!resolved) {
           // Send a version request to verify it's actually E-IMZO
-          ws?.send(JSON.stringify({ name: "version" }));
+          ws?.send(JSON.stringify({ name: 'version' }))
         }
-      };
+      }
 
       ws.onmessage = (event) => {
         if (!resolved) {
-          resolved = true;
-          clearTimeout(timeout);
-          cleanup();
+          resolved = true
+          clearTimeout(timeout)
+          cleanup()
           // If we got a response, E-IMZO is running
           try {
-            const data = JSON.parse(event.data);
-            resolve({ success: data.success !== false, port });
-          } catch {
-            resolve({ success: true, port });
+            const data = JSON.parse(event.data)
+            resolve({ success: data.success !== false, port })
+          }
+          catch {
+            resolve({ success: true, port })
           }
         }
-      };
+      }
 
       ws.onerror = () => {
         if (!resolved) {
-          resolved = true;
-          clearTimeout(timeout);
-          cleanup();
-          resolve({ success: false, port });
+          resolved = true
+          clearTimeout(timeout)
+          cleanup()
+          resolve({ success: false, port })
         }
-      };
+      }
 
       ws.onclose = () => {
         if (!resolved) {
-          resolved = true;
-          clearTimeout(timeout);
-          cleanup();
-          resolve({ success: false, port });
+          resolved = true
+          clearTimeout(timeout)
+          cleanup()
+          resolve({ success: false, port })
         }
-      };
-    } catch {
-      if (!resolved) {
-        resolved = true;
-        clearTimeout(timeout);
-        cleanup();
-        resolve({ success: false, port });
       }
     }
-  });
+    catch {
+      if (!resolved) {
+        resolved = true
+        clearTimeout(timeout)
+        cleanup()
+        resolve({ success: false, port })
+      }
+    }
+  })
 }
 
 /**
@@ -169,7 +172,7 @@ function tryConnect(
  * ```
  */
 export async function detectEIMZO(): Promise<EIMZOStatus> {
-  const browserSupported = checkBrowserSupport();
+  const browserSupported = checkBrowserSupport()
 
   if (!browserSupported) {
     return {
@@ -177,14 +180,14 @@ export async function detectEIMZO(): Promise<EIMZOStatus> {
       isRunning: false,
       port: null,
       browserSupported: false,
-    };
+    }
   }
 
   // Get the appropriate config based on page protocol
-  const { protocol, port } = getWebSocketConfig();
+  const { protocol, port } = getWebSocketConfig()
 
   // Try to connect
-  const result = await tryConnect(protocol, port);
+  const result = await tryConnect(protocol, port)
 
   if (result.success) {
     return {
@@ -192,7 +195,7 @@ export async function detectEIMZO(): Promise<EIMZOStatus> {
       isRunning: true,
       port: result.port,
       browserSupported: true,
-    };
+    }
   }
 
   return {
@@ -200,14 +203,14 @@ export async function detectEIMZO(): Promise<EIMZOStatus> {
     isRunning: false,
     port: null,
     browserSupported: true,
-  };
+  }
 }
 
 /**
  * Get the recommended download URL for E-IMZO
  */
 export function getEIMZODownloadUrl(): string {
-  return "https://e-imzo.soliq.uz/download/";
+  return 'https://e-imzo.soliq.uz/download/'
 }
 
 /**
@@ -215,8 +218,8 @@ export function getEIMZODownloadUrl(): string {
  * This is a convenience wrapper around detectEIMZO for simple boolean checks
  */
 export async function isEIMZOAvailable(): Promise<boolean> {
-  const status = await detectEIMZO();
-  return status.isRunning;
+  const status = await detectEIMZO()
+  return status.isRunning
 }
 
 /**
@@ -224,6 +227,6 @@ export async function isEIMZOAvailable(): Promise<boolean> {
  * Useful for debugging
  */
 export function getEIMZOWebSocketUrl(): string {
-  const { protocol, port } = getWebSocketConfig();
-  return `${protocol}://127.0.0.1:${port}${EIMZO_PATH}`;
+  const { protocol, port } = getWebSocketConfig()
+  return `${protocol}://127.0.0.1:${port}${EIMZO_PATH}`
 }

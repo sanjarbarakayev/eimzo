@@ -39,9 +39,9 @@ pnpm add @eimzo/vue
 ### 1. Register the Plugin
 
 ```typescript
+import { VueESignature } from '@eimzo/vue'
 // main.ts
 import { createApp } from 'vue'
-import { VueESignature } from '@eimzo/vue'
 import App from './App.vue'
 
 const app = createApp(App)
@@ -53,8 +53,9 @@ app.mount('#app')
 
 ```vue
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useESignature, type Certificate } from '@eimzo/vue'
+import type { Certificate } from '@eimzo/vue'
+import { useESignature } from '@eimzo/vue'
+import { onMounted, ref } from 'vue'
 
 const {
   isInstalled,
@@ -81,8 +82,9 @@ onMounted(async () => {
   await listKeys()
 })
 
-const handleSign = async () => {
-  if (!selectedCert.value) return
+async function handleSign() {
+  if (!selectedCert.value)
+    return
 
   try {
     // Load the certificate key
@@ -91,7 +93,8 @@ const handleSign = async () => {
     // Sign data
     const signature = await signData(JSON.stringify({ data: 'to sign' }))
     console.log('Signature:', signature)
-  } catch (e) {
+  }
+  catch (e) {
     console.error('Signing failed:', e)
   }
 }
@@ -99,19 +102,25 @@ const handleSign = async () => {
 
 <template>
   <div>
-    <div v-if="isLoading">Loading...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
+    <div v-if="isLoading">
+      Loading...
+    </div>
+    <div v-else-if="error" class="error">
+      {{ error }}
+    </div>
     <div v-else-if="isInstalled">
       <select v-model="selectedCert">
         <option v-for="cert in certificates" :key="cert.serialNumber" :value="cert">
           {{ cert.CN }} ({{ cert.TIN }})
         </option>
       </select>
-      <button @click="handleSign" :disabled="!selectedCert">
+      <button :disabled="!selectedCert" @click="handleSign">
         Sign Document
       </button>
     </div>
-    <div v-else>E-IMZO not installed</div>
+    <div v-else>
+      E-IMZO not installed
+    </div>
   </div>
 </template>
 ```
@@ -187,16 +196,16 @@ const signature = await signer.createPkcs7(id, data)
 
 ```typescript
 interface Certificate {
-  serialNumber: string;    // Certificate serial number
-  validFrom: Date;         // Validity start date
-  validTo: Date;           // Validity end date
-  CN: string;              // Common Name (owner's full name)
-  TIN: string;             // Tax Identification Number (INN)
-  PINFL: string;           // Personal ID Number
-  UID: string;             // Unique Identifier
-  O: string;               // Organization
-  T: string;               // Title/Position
-  type: 'pfx' | 'ftjc';    // Certificate type
+  serialNumber: string // Certificate serial number
+  validFrom: Date // Validity start date
+  validTo: Date // Validity end date
+  CN: string // Common Name (owner's full name)
+  TIN: string // Tax Identification Number (INN)
+  PINFL: string // Personal ID Number
+  UID: string // Unique Identifier
+  O: string // Organization
+  T: string // Title/Position
+  type: 'pfx' | 'ftjc' // Certificate type
 }
 ```
 
@@ -246,11 +255,12 @@ if (!success) {
   if (error.value?.includes('E-IMZO')) {
     // E-IMZO not installed
     showInstallPrompt()
-  } else if (error.value?.includes('version')) {
+  }
+  else if (error.value?.includes('version')) {
     // Version too old
     showUpdatePrompt()
   }
-  
+
   clearError()
 }
 ```
@@ -277,7 +287,8 @@ const cachedKeyId = Cookies.get(CACHE_KEY)
 if (cachedKeyId) {
   try {
     return await signData(data, cachedKeyId)
-  } catch {
+  }
+  catch {
     // Key expired, reload
   }
 }
@@ -293,12 +304,12 @@ Full TypeScript support with exported types:
 ```typescript
 import type {
   Certificate,
-  PfxCertificate,
+  ESignaturePluginOptions,
   FtjcCertificate,
   LoadKeyResult,
+  PfxCertificate,
   SignPkcs7Result,
-  VersionInfo,
-  ESignaturePluginOptions
+  VersionInfo
 } from '@eimzo/vue'
 ```
 

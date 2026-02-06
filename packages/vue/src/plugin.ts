@@ -15,18 +15,20 @@
  * ```
  */
 
-import { ESignature } from "./eimzo";
-import type { App, InjectionKey } from "vue";
-import type { ApiKeyPair } from "@eimzo/core";
+import type { ApiKeyPair } from '@eimzo/core'
+import type { App, InjectionKey } from 'vue'
+import { ESignature } from './eimzo'
 
 /**
  * Vue plugin configuration options
  */
 export interface ESignaturePluginOptions {
   /** Additional API keys for domain authorization */
-  apiKeys?: ApiKeyPair[];
+  apiKeys?: ApiKeyPair[]
   /** Auto-install on Vue plugin registration */
-  autoInstall?: boolean;
+  autoInstall?: boolean
+  /** Enable Vue DevTools integration (default: true in development) */
+  devtools?: boolean
 }
 
 // ============================================================================
@@ -37,8 +39,8 @@ export interface ESignaturePluginOptions {
  * Injection key for E-Signature instance
  * Use this with inject() in composition API
  */
-export const ESIGNATURE_INJECTION_KEY: InjectionKey<ESignature> =
-  Symbol("esignature");
+export const ESIGNATURE_INJECTION_KEY: InjectionKey<ESignature>
+  = Symbol('esignature')
 
 // ============================================================================
 // Vue Plugin
@@ -62,28 +64,28 @@ export const ESIGNATURE_INJECTION_KEY: InjectionKey<ESignature> =
  */
 export const VueESignature = {
   install(app: App, options?: ESignaturePluginOptions): void {
-    const signer = new ESignature();
+    const signer = new ESignature()
 
     if (options?.apiKeys) {
       for (const { domain, key } of options.apiKeys) {
-        signer.addApiKey(domain, key);
+        signer.addApiKey(domain, key)
       }
     }
 
-    app.provide(ESIGNATURE_INJECTION_KEY, signer);
-    app.config.globalProperties.$esignature = signer;
+    app.provide(ESIGNATURE_INJECTION_KEY, signer)
+    app.config.globalProperties.$esignature = signer
   },
-};
+}
 
 // ============================================================================
 // Type Augmentation for Vue
 // ============================================================================
 
-declare module "vue" {
+declare module 'vue' {
   interface ComponentCustomProperties {
     /** E-Signature digital signature service instance */
-    $esignature: ESignature;
+    $esignature: ESignature
   }
 }
 
-export default VueESignature;
+export default VueESignature

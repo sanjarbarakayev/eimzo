@@ -4,8 +4,8 @@
  * Defines interfaces for error recovery strategies in E-IMZO SDK.
  */
 
-import type { EIMZOError } from '../errors/eimzo-error';
-import type { ErrorCode } from '../types/error-codes';
+import type { EIMZOError } from '../errors/eimzo-error'
+import type { ErrorCode } from '../types/error-codes'
 
 /**
  * Minimal client interface needed for recovery operations
@@ -13,13 +13,13 @@ import type { ErrorCode } from '../types/error-codes';
  */
 export interface RecoveryClient {
   /** Reconnect to the WebSocket server */
-  reconnect?(): Promise<void>;
+  reconnect?: () => Promise<void>
   /** Refresh/reload certificates */
-  refreshCertificates?(): Promise<void>;
+  refreshCertificates?: () => Promise<void>
   /** Check E-IMZO version */
-  checkVersion?(): Promise<string>;
+  checkVersion?: () => Promise<string>
   /** Check if connected */
-  isConnected?(): boolean;
+  isConnected?: () => boolean
 }
 
 /**
@@ -27,15 +27,15 @@ export interface RecoveryClient {
  */
 export interface RecoveryContext {
   /** The error to recover from */
-  readonly error: EIMZOError;
+  readonly error: EIMZOError
   /** Client instance for recovery operations */
-  readonly client: RecoveryClient;
+  readonly client: RecoveryClient
   /** Operation that was being performed */
-  readonly operation: string;
+  readonly operation: string
   /** Current recovery attempt number (1-based) */
-  readonly attempt: number;
+  readonly attempt: number
   /** Maximum recovery attempts allowed */
-  readonly maxAttempts: number;
+  readonly maxAttempts: number
 }
 
 /**
@@ -43,11 +43,11 @@ export interface RecoveryContext {
  */
 export interface RecoveryResult {
   /** Whether recovery was successful */
-  readonly recovered: boolean;
+  readonly recovered: boolean
   /** Whether the original operation should be retried */
-  readonly shouldRetryOperation: boolean;
+  readonly shouldRetryOperation: boolean
   /** Optional message describing recovery outcome */
-  readonly message?: string;
+  readonly message?: string
 }
 
 /**
@@ -55,11 +55,11 @@ export interface RecoveryResult {
  */
 export interface RecoveryStrategy {
   /** Unique name for this strategy */
-  readonly name: string;
+  readonly name: string
   /** Error codes this strategy can handle */
-  readonly handles: readonly ErrorCode[];
+  readonly handles: readonly ErrorCode[]
   /** Priority (higher = tried first) */
-  readonly priority: number;
+  readonly priority: number
 
   /**
    * Checks if this strategy can potentially recover from the error
@@ -67,7 +67,7 @@ export interface RecoveryStrategy {
    * @param error - The error to check
    * @returns True if this strategy might be able to recover
    */
-  canRecover(error: EIMZOError): boolean;
+  canRecover: (error: EIMZOError) => boolean
 
   /**
    * Attempts to recover from the error
@@ -75,5 +75,5 @@ export interface RecoveryStrategy {
    * @param context - Recovery context
    * @returns Recovery result
    */
-  recover(context: RecoveryContext): Promise<RecoveryResult>;
+  recover: (context: RecoveryContext) => Promise<RecoveryResult>
 }

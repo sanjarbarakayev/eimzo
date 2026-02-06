@@ -6,32 +6,32 @@
  * @packageDocumentation
  */
 
-import type { App, Ref } from 'vue'
 import type { Certificate, ConnectionState, RetryInfo } from '@eimzo/core'
+import type { App, Ref } from 'vue'
 
 // DevTools API types (from @vue/devtools-api)
 interface DevtoolsPluginApi {
-  addInspector(options: { id: string; label: string; icon?: string }): void
+  addInspector: (options: { id: string, label: string, icon?: string }) => void
 
-  sendInspectorTree(inspectorId: string, payload: { data: InspectorNode[] }): void
+  sendInspectorTree: (inspectorId: string, payload: { data: InspectorNode[] }) => void
 
-  sendInspectorState(
+  sendInspectorState: (
     inspectorId: string,
     payload: {
-      state: Record<string, { key: string; value: unknown; editable?: boolean }[]>
-    }
-  ): void
+      state: Record<string, { key: string, value: unknown, editable?: boolean }[]>
+    },
+  ) => void
 
   on: {
-    getInspectorTree(cb: (payload: { inspectorId: string; app: App }) => void): void
-    getInspectorState(
-      cb: (payload: { inspectorId: string; nodeId: string; app: App }) => void
-    ): void
+    getInspectorTree: (cb: (payload: { inspectorId: string, app: App }) => void) => void
+    getInspectorState: (
+      cb: (payload: { inspectorId: string, nodeId: string, app: App }) => void,
+    ) => void
   }
 
-  addTimelineLayer(options: { id: string; label: string; color: number }): void
+  addTimelineLayer: (options: { id: string, label: string, color: number }) => void
 
-  addTimelineEvent(options: {
+  addTimelineEvent: (options: {
     layerId: string
     event: {
       title: string
@@ -41,16 +41,16 @@ interface DevtoolsPluginApi {
       groupId?: string | number
       meta?: Record<string, unknown>
     }
-  }): void
+  }) => void
 
-  notifyComponentUpdate(): void
+  notifyComponentUpdate: () => void
 }
 
 interface InspectorNode {
   id: string
   label: string
   children?: InspectorNode[]
-  tags?: { label: string; textColor: number; backgroundColor: number }[]
+  tags?: { label: string, textColor: number, backgroundColor: number }[]
 }
 
 // State tracking for DevTools
@@ -68,11 +68,11 @@ interface EIMZODevToolsState {
 
 // Colors for timeline events
 const COLORS = {
-  green: 0x42b983,
-  blue: 0x3b82f6,
-  red: 0xef4444,
-  yellow: 0xfbbf24,
-  gray: 0x6b7280,
+  green: 0x42B983,
+  blue: 0x3B82F6,
+  red: 0xEF4444,
+  yellow: 0xFBBF24,
+  gray: 0x6B7280,
 }
 
 // Inspector ID
@@ -106,7 +106,7 @@ export function setupDevtools(app: App, state: EIMZODevToolsState): void {
           componentStateTypes: string[]
           app: App
         },
-        setupFn: (api: DevtoolsPluginApi) => void
+        setupFn: (api: DevtoolsPluginApi) => void,
       ) => void
 
       setup(
@@ -136,7 +136,8 @@ export function setupDevtools(app: App, state: EIMZODevToolsState): void {
 
           // Handle inspector tree requests
           api.on.getInspectorTree((payload) => {
-            if (payload.inspectorId !== INSPECTOR_ID) return
+            if (payload.inspectorId !== INSPECTOR_ID)
+              return
 
             const nodes: InspectorNode[] = [
               {
@@ -145,7 +146,7 @@ export function setupDevtools(app: App, state: EIMZODevToolsState): void {
                 tags: [
                   {
                     label: state.connectionState.value,
-                    textColor: 0xffffff,
+                    textColor: 0xFFFFFF,
                     backgroundColor: getConnectionColor(state.connectionState.value),
                   },
                 ],
@@ -159,14 +160,14 @@ export function setupDevtools(app: App, state: EIMZODevToolsState): void {
                   tags: [
                     {
                       label: cert.type,
-                      textColor: 0xffffff,
+                      textColor: 0xFFFFFF,
                       backgroundColor: COLORS.blue,
                     },
                     ...(state.loadedCert.value?.serialNumber === cert.serialNumber
                       ? [
                           {
                             label: 'LOADED',
-                            textColor: 0xffffff,
+                            textColor: 0xFFFFFF,
                             backgroundColor: COLORS.green,
                           },
                         ]
@@ -185,12 +186,13 @@ export function setupDevtools(app: App, state: EIMZODevToolsState): void {
 
           // Handle inspector state requests
           api.on.getInspectorState((payload) => {
-            if (payload.inspectorId !== INSPECTOR_ID) return
+            if (payload.inspectorId !== INSPECTOR_ID)
+              return
 
             if (payload.nodeId === 'connection') {
               api.sendInspectorState(INSPECTOR_ID, {
                 state: {
-                  Connection: [
+                  'Connection': [
                     { key: 'State', value: state.connectionState.value },
                     { key: 'Is Loading', value: state.isLoading.value },
                     { key: 'Error', value: state.error.value },
@@ -210,8 +212,9 @@ export function setupDevtools(app: App, state: EIMZODevToolsState): void {
                     : [{ key: 'Status', value: 'No active retry' }],
                 },
               })
-            } else if (payload.nodeId.startsWith('cert-')) {
-              const index = parseInt(payload.nodeId.replace('cert-', ''), 10)
+            }
+            else if (payload.nodeId.startsWith('cert-')) {
+              const index = Number.parseInt(payload.nodeId.replace('cert-', ''), 10)
               const cert = state.certificates.value[index]
 
               if (cert) {
@@ -239,14 +242,15 @@ export function setupDevtools(app: App, state: EIMZODevToolsState): void {
                       {
                         key: 'Days Until Expiry',
                         value: Math.ceil(
-                          (cert.validTo.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                          (cert.validTo.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
                         ),
                       },
                     ],
                   },
                 })
               }
-            } else if (payload.nodeId === 'state') {
+            }
+            else if (payload.nodeId === 'state') {
               api.sendInspectorState(INSPECTOR_ID, {
                 state: {
                   'Current State': [
@@ -259,7 +263,8 @@ export function setupDevtools(app: App, state: EIMZODevToolsState): void {
                   ],
                 },
               })
-            } else if (payload.nodeId === 'certificates') {
+            }
+            else if (payload.nodeId === 'certificates') {
               api.sendInspectorState(INSPECTOR_ID, {
                 state: {
                   Summary: [
@@ -270,7 +275,7 @@ export function setupDevtools(app: App, state: EIMZODevToolsState): void {
                     },
                     {
                       key: 'Expired',
-                      value: state.certificates.value.filter((c) => new Date() > c.validTo).length,
+                      value: state.certificates.value.filter(c => new Date() > c.validTo).length,
                     },
                   ],
                 },
@@ -283,7 +288,7 @@ export function setupDevtools(app: App, state: EIMZODevToolsState): void {
             title: string,
             subtitle?: string,
             data?: Record<string, unknown>,
-            color: number = COLORS.green
+            color: number = COLORS.green,
           ) => {
             api.addTimelineEvent({
               layerId: TIMELINE_LAYER_ID,
@@ -301,7 +306,7 @@ export function setupDevtools(app: App, state: EIMZODevToolsState): void {
           ;(app as { _eimzoDevtools?: { emitEvent: typeof emitEvent } })._eimzoDevtools = {
             emitEvent,
           }
-        }
+        },
       )
     })
     .catch(() => {
@@ -336,7 +341,7 @@ function getCertificatesByType(certificates: Certificate[]): Record<string, numb
       acc[cert.type] = (acc[cert.type] || 0) + 1
       return acc
     },
-    {} as Record<string, number>
+    {} as Record<string, number>,
   )
 }
 
@@ -348,9 +353,10 @@ export function emitDevToolsEvent(
   title: string,
   subtitle?: string,
   data?: Record<string, unknown>,
-  type: 'success' | 'error' | 'info' = 'info'
+  type: 'success' | 'error' | 'info' = 'info',
 ): void {
-  if (!app) return
+  if (!app)
+    return
 
   const devtools = (app as { _eimzoDevtools?: { emitEvent: Function } })._eimzoDevtools
 

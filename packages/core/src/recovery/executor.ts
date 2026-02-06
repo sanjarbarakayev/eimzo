@@ -23,36 +23,36 @@
  * ```
  */
 
-import type { EIMZOError } from '../errors/eimzo-error';
+import type { EIMZOError } from '../errors/eimzo-error'
 import type {
-  RecoveryStrategy,
+  RecoveryClient,
   RecoveryContext,
   RecoveryResult,
-  RecoveryClient,
-} from './types';
+  RecoveryStrategy,
+} from './types'
 
 /**
  * Options for recovery executor
  */
 export interface RecoveryExecutorOptions {
   /** Maximum recovery attempts per error (default: 3) */
-  readonly maxAttempts?: number;
+  readonly maxAttempts?: number
 }
 
 /**
  * Orchestrates error recovery using registered strategies
  */
 export class RecoveryExecutor {
-  private readonly strategies: readonly RecoveryStrategy[];
-  private readonly maxAttempts: number;
+  private readonly strategies: readonly RecoveryStrategy[]
+  private readonly maxAttempts: number
 
   constructor(
     strategies: readonly RecoveryStrategy[],
-    options?: RecoveryExecutorOptions
+    options?: RecoveryExecutorOptions,
   ) {
     // Sort by priority (highest first) and freeze
-    this.strategies = [...strategies].sort((a, b) => b.priority - a.priority);
-    this.maxAttempts = options?.maxAttempts ?? 3;
+    this.strategies = [...strategies].sort((a, b) => b.priority - a.priority)
+    this.maxAttempts = options?.maxAttempts ?? 3
   }
 
   /**
@@ -62,7 +62,7 @@ export class RecoveryExecutor {
    * @returns Applicable strategies sorted by priority
    */
   findApplicableStrategies(error: EIMZOError): readonly RecoveryStrategy[] {
-    return this.strategies.filter((strategy) => strategy.canRecover(error));
+    return this.strategies.filter(strategy => strategy.canRecover(error))
   }
 
   /**
@@ -79,16 +79,16 @@ export class RecoveryExecutor {
   async attemptRecovery(
     error: EIMZOError,
     client: RecoveryClient,
-    operation: string
+    operation: string,
   ): Promise<RecoveryResult> {
-    const applicableStrategies = this.findApplicableStrategies(error);
+    const applicableStrategies = this.findApplicableStrategies(error)
 
     if (applicableStrategies.length === 0) {
       return {
         recovered: false,
         shouldRetryOperation: false,
         message: `No recovery strategy found for error code: ${error.code}`,
-      };
+      }
     }
 
     for (let attempt = 1; attempt <= this.maxAttempts; attempt++) {
@@ -99,26 +99,27 @@ export class RecoveryExecutor {
           operation,
           attempt,
           maxAttempts: this.maxAttempts,
-        };
+        }
 
         try {
-          const result = await strategy.recover(context);
+          const result = await strategy.recover(context)
 
           if (result.recovered || result.shouldRetryOperation) {
             return {
               ...result,
               message: `[${strategy.name}] ${result.message ?? 'Recovery succeeded'}`,
-            };
+            }
           }
 
           // Strategy indicated recovery is not possible for this error
           if (!result.recovered && !result.shouldRetryOperation) {
             // Continue to next strategy
-            continue;
+            continue
           }
-        } catch (strategyError) {
+        }
+        catch (strategyError) {
           // Strategy threw an error, try next strategy
-          continue;
+          continue
         }
       }
     }
@@ -127,7 +128,7 @@ export class RecoveryExecutor {
       recovered: false,
       shouldRetryOperation: false,
       message: `All recovery attempts exhausted after ${this.maxAttempts} attempts`,
-    };
+    }
   }
 
   /**
@@ -137,7 +138,7 @@ export class RecoveryExecutor {
    * @returns True if at least one strategy can handle the error
    */
   canAttemptRecovery(error: EIMZOError): boolean {
-    return this.findApplicableStrategies(error).length > 0;
+    return this.findApplicableStrategies(error).length > 0
   }
 
   /**
@@ -147,6 +148,6 @@ export class RecoveryExecutor {
    * @returns Array of strategy names
    */
   getApplicableStrategyNames(error: EIMZOError): readonly string[] {
-    return this.findApplicableStrategies(error).map((s) => s.name);
+    return this.findApplicableStrategies(error).map(s => s.name)
   }
 }

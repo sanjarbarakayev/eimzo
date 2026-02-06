@@ -2,21 +2,21 @@
  * Types for ESignatureErrorBoundary component
  */
 
-import type { InjectionKey } from 'vue';
-import type { EIMZOError } from '@eimzo/core';
+import type { EIMZOError } from '@eimzo/core'
+import type { InjectionKey } from 'vue'
 
 /**
  * Props for error slot
  */
 export interface ErrorBoundarySlotProps {
   /** The caught error */
-  error: EIMZOError;
+  error: EIMZOError
   /** Retry the operation that failed */
-  retry: () => void;
+  retry: () => void
   /** Reset the error boundary without retrying */
-  reset: () => void;
+  reset: () => void
   /** Number of retry attempts made */
-  retryCount: number;
+  retryCount: number
 }
 
 /**
@@ -24,11 +24,11 @@ export interface ErrorBoundarySlotProps {
  */
 export interface ErrorBoundaryContext {
   /** Whether an error is currently being displayed */
-  hasError: boolean;
+  hasError: boolean
   /** Trigger retry from a descendant */
-  triggerRetry: () => void;
+  triggerRetry: () => void
   /** Reset error state from a descendant */
-  triggerReset: () => void;
+  triggerReset: () => void
 }
 
 /**
@@ -36,16 +36,16 @@ export interface ErrorBoundaryContext {
  */
 export interface ESignatureErrorBoundaryProps {
   /** Maximum number of retry attempts (default: 3) */
-  maxRetries?: number;
+  maxRetries?: number
   /** Auto-reset error state after this many milliseconds (0 = disabled) */
-  autoResetMs?: number;
+  autoResetMs?: number
   /** Custom filter to determine if an error should be caught */
-  shouldCatch?: (error: unknown) => boolean;
+  shouldCatch?: (error: unknown) => boolean
 }
 
 /**
  * Injection key for error boundary context
  */
 export const ERROR_BOUNDARY_KEY: InjectionKey<ErrorBoundaryContext> = Symbol(
-  'ESignatureErrorBoundary'
-);
+  'ESignatureErrorBoundary',
+)

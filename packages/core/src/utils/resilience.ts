@@ -25,17 +25,17 @@
  */
 export interface RetryOptions {
   /** Maximum number of retry attempts (default: 3) */
-  maxRetries?: number;
+  maxRetries?: number
   /** Base delay in milliseconds between retries (default: 1000) */
-  baseDelay?: number;
+  baseDelay?: number
   /** Maximum delay in milliseconds between retries (default: 10000) */
-  maxDelay?: number;
+  maxDelay?: number
   /** Multiplier for exponential backoff (default: 2) */
-  backoffMultiplier?: number;
+  backoffMultiplier?: number
   /** Custom function to determine if an error is retryable */
-  isRetryable?: (error: unknown) => boolean;
+  isRetryable?: (error: unknown) => boolean
   /** Callback fired before each retry attempt */
-  onRetry?: (attempt: number, error: unknown, delay: number) => void;
+  onRetry?: (attempt: number, error: unknown, delay: number) => void
 }
 
 /**
@@ -43,9 +43,9 @@ export interface RetryOptions {
  */
 export interface TimeoutOptions {
   /** Timeout in milliseconds (default: 30000) */
-  timeout?: number;
+  timeout?: number
   /** Custom timeout error message */
-  timeoutMessage?: string;
+  timeoutMessage?: string
 }
 
 /**
@@ -53,15 +53,15 @@ export interface TimeoutOptions {
  */
 export interface ResilienceOptions extends RetryOptions, TimeoutOptions {
   /** Enable retry logic (default: true) */
-  enableRetry?: boolean;
+  enableRetry?: boolean
   /** Enable timeout logic (default: true) */
-  enableTimeout?: boolean;
+  enableTimeout?: boolean
 }
 
 /**
  * Error classification types
  */
-export type ErrorType = "transient" | "application" | "unknown";
+export type ErrorType = 'transient' | 'application' | 'unknown'
 
 // ============================================================================
 // Default Options
@@ -71,7 +71,7 @@ export type ErrorType = "transient" | "application" | "unknown";
  * Default resilience configuration
  */
 export const DEFAULT_RESILIENCE_OPTIONS: Required<
-  Omit<ResilienceOptions, "isRetryable" | "onRetry" | "timeoutMessage">
+  Omit<ResilienceOptions, 'isRetryable' | 'onRetry' | 'timeoutMessage'>
 > = {
   timeout: 30000,
   maxRetries: 3,
@@ -80,7 +80,7 @@ export const DEFAULT_RESILIENCE_OPTIONS: Required<
   backoffMultiplier: 2,
   enableRetry: true,
   enableTimeout: true,
-};
+}
 
 // ============================================================================
 // Custom Errors
@@ -90,13 +90,13 @@ export const DEFAULT_RESILIENCE_OPTIONS: Required<
  * Error thrown when an operation times out
  */
 export class TimeoutError extends Error {
-  readonly name = "TimeoutError" as const;
-  readonly timeout: number;
+  readonly name = 'TimeoutError' as const
+  readonly timeout: number
 
   constructor(message: string, timeout: number) {
-    super(message);
-    this.timeout = timeout;
-    Object.setPrototypeOf(this, TimeoutError.prototype);
+    super(message)
+    this.timeout = timeout
+    Object.setPrototypeOf(this, TimeoutError.prototype)
   }
 }
 
@@ -104,15 +104,15 @@ export class TimeoutError extends Error {
  * Error thrown when all retry attempts are exhausted
  */
 export class RetryExhaustedError extends Error {
-  readonly name = "RetryExhaustedError" as const;
-  readonly attempts: number;
-  readonly lastError: unknown;
+  readonly name = 'RetryExhaustedError' as const
+  readonly attempts: number
+  readonly lastError: unknown
 
   constructor(message: string, attempts: number, lastError: unknown) {
-    super(message);
-    this.attempts = attempts;
-    this.lastError = lastError;
-    Object.setPrototypeOf(this, RetryExhaustedError.prototype);
+    super(message)
+    this.attempts = attempts
+    this.lastError = lastError
+    Object.setPrototypeOf(this, RetryExhaustedError.prototype)
   }
 }
 
@@ -130,20 +130,20 @@ const TRANSIENT_WS_CLOSE_CODES = new Set([
   1012, // Service Restart - server is restarting
   1013, // Try Again Later - server is temporarily overloaded
   1014, // Bad Gateway - server acting as gateway received invalid response
-]);
+])
 
 /**
  * Error messages that indicate application-level errors (not retryable)
  */
 const APPLICATION_ERROR_PATTERNS = [
-  "BadPaddingException",
-  "InvalidKeyException",
-  "CertificateExpired",
-  "CertificateNotYetValid",
-  "InvalidPassword",
-  "KeyNotFound",
-  "CertificateRevoked",
-];
+  'BadPaddingException',
+  'InvalidKeyException',
+  'CertificateExpired',
+  'CertificateNotYetValid',
+  'InvalidPassword',
+  'KeyNotFound',
+  'CertificateRevoked',
+]
 
 // ============================================================================
 // Error Classification
@@ -169,47 +169,47 @@ const APPLICATION_ERROR_PATTERNS = [
  */
 export function classifyError(error: unknown): ErrorType {
   // Handle WebSocket close codes
-  if (typeof error === "number") {
-    return TRANSIENT_WS_CLOSE_CODES.has(error) ? "transient" : "application";
+  if (typeof error === 'number') {
+    return TRANSIENT_WS_CLOSE_CODES.has(error) ? 'transient' : 'application'
   }
 
   // Handle CloseEvent
-  if (error instanceof Event && "code" in error) {
-    const code = (error as CloseEvent).code;
-    return TRANSIENT_WS_CLOSE_CODES.has(code) ? "transient" : "application";
+  if (error instanceof Event && 'code' in error) {
+    const code = (error as CloseEvent).code
+    return TRANSIENT_WS_CLOSE_CODES.has(code) ? 'transient' : 'application'
   }
 
   // Handle Error objects
   if (error instanceof Error) {
-    const message = error.message.toLowerCase();
+    const message = error.message.toLowerCase()
 
     // Check for application-level errors
     for (const pattern of APPLICATION_ERROR_PATTERNS) {
       if (message.includes(pattern.toLowerCase())) {
-        return "application";
+        return 'application'
       }
     }
 
     // Check for common transient error patterns
     if (
-      message.includes("network") ||
-      message.includes("connection") ||
-      message.includes("timeout") ||
-      message.includes("econnrefused") ||
-      message.includes("econnreset") ||
-      message.includes("socket") ||
-      message.includes("websocket")
+      message.includes('network')
+      || message.includes('connection')
+      || message.includes('timeout')
+      || message.includes('econnrefused')
+      || message.includes('econnreset')
+      || message.includes('socket')
+      || message.includes('websocket')
     ) {
-      return "transient";
+      return 'transient'
     }
 
     // TimeoutError is always transient
     if (error instanceof TimeoutError) {
-      return "transient";
+      return 'transient'
     }
   }
 
-  return "unknown";
+  return 'unknown'
 }
 
 /**
@@ -228,8 +228,8 @@ export function classifyError(error: unknown): ErrorType {
  * ```
  */
 export function isTransientError(error: unknown): boolean {
-  const classification = classifyError(error);
-  return classification === "transient" || classification === "unknown";
+  const classification = classifyError(error)
+  return classification === 'transient' || classification === 'unknown'
 }
 
 // ============================================================================
@@ -256,20 +256,20 @@ export function calculateBackoffDelay(
   attempt: number,
   baseDelay: number,
   maxDelay: number,
-  multiplier: number
+  multiplier: number,
 ): number {
   // Calculate exponential delay: baseDelay * multiplier^(attempt-1)
-  const exponentialDelay = baseDelay * Math.pow(multiplier, attempt - 1);
+  const exponentialDelay = baseDelay * multiplier ** (attempt - 1)
 
   // Clamp to maxDelay
-  const clampedDelay = Math.min(exponentialDelay, maxDelay);
+  const clampedDelay = Math.min(exponentialDelay, maxDelay)
 
   // Add jitter (±25%) to prevent thundering herd
-  const jitter = 0.25;
-  const jitterRange = clampedDelay * jitter;
-  const randomJitter = Math.random() * jitterRange * 2 - jitterRange;
+  const jitter = 0.25
+  const jitterRange = clampedDelay * jitter
+  const randomJitter = Math.random() * jitterRange * 2 - jitterRange
 
-  return Math.max(0, Math.floor(clampedDelay + randomJitter));
+  return Math.max(0, Math.floor(clampedDelay + randomJitter))
 }
 
 // ============================================================================
@@ -293,45 +293,45 @@ export function calculateBackoffDelay(
  */
 export async function withTimeout<T>(
   operation: () => Promise<T>,
-  options: TimeoutOptions = {}
+  options: TimeoutOptions = {},
 ): Promise<T> {
-  const timeout = options.timeout ?? DEFAULT_RESILIENCE_OPTIONS.timeout;
-  const timeoutMessage =
-    options.timeoutMessage ?? `Operation timed out after ${timeout}ms`;
+  const timeout = options.timeout ?? DEFAULT_RESILIENCE_OPTIONS.timeout
+  const timeoutMessage
+    = options.timeoutMessage ?? `Operation timed out after ${timeout}ms`
 
   return new Promise<T>((resolve, reject) => {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    let completed = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+    let completed = false
 
     // Set up timeout
     timeoutId = setTimeout(() => {
       if (!completed) {
-        completed = true;
-        reject(new TimeoutError(timeoutMessage, timeout));
+        completed = true
+        reject(new TimeoutError(timeoutMessage, timeout))
       }
-    }, timeout);
+    }, timeout)
 
     // Run the operation
     operation()
       .then((result) => {
         if (!completed) {
-          completed = true;
+          completed = true
           if (timeoutId) {
-            clearTimeout(timeoutId);
+            clearTimeout(timeoutId)
           }
-          resolve(result);
+          resolve(result)
         }
       })
       .catch((error) => {
         if (!completed) {
-          completed = true;
+          completed = true
           if (timeoutId) {
-            clearTimeout(timeoutId);
+            clearTimeout(timeoutId)
           }
-          reject(error);
+          reject(error)
         }
-      });
-  });
+      })
+  })
 }
 
 // ============================================================================
@@ -361,32 +361,33 @@ export async function withTimeout<T>(
  */
 export async function withRetry<T>(
   operation: () => Promise<T>,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): Promise<T> {
-  const maxRetries = options.maxRetries ?? DEFAULT_RESILIENCE_OPTIONS.maxRetries;
-  const baseDelay = options.baseDelay ?? DEFAULT_RESILIENCE_OPTIONS.baseDelay;
-  const maxDelay = options.maxDelay ?? DEFAULT_RESILIENCE_OPTIONS.maxDelay;
-  const backoffMultiplier =
-    options.backoffMultiplier ?? DEFAULT_RESILIENCE_OPTIONS.backoffMultiplier;
-  const isRetryableFn = options.isRetryable ?? isTransientError;
-  const onRetry = options.onRetry;
+  const maxRetries = options.maxRetries ?? DEFAULT_RESILIENCE_OPTIONS.maxRetries
+  const baseDelay = options.baseDelay ?? DEFAULT_RESILIENCE_OPTIONS.baseDelay
+  const maxDelay = options.maxDelay ?? DEFAULT_RESILIENCE_OPTIONS.maxDelay
+  const backoffMultiplier
+    = options.backoffMultiplier ?? DEFAULT_RESILIENCE_OPTIONS.backoffMultiplier
+  const isRetryableFn = options.isRetryable ?? isTransientError
+  const onRetry = options.onRetry
 
-  let lastError: unknown;
+  let lastError: unknown
 
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
     try {
-      return await operation();
-    } catch (error) {
-      lastError = error;
+      return await operation()
+    }
+    catch (error) {
+      lastError = error
 
       // Don't retry if this was the last attempt
       if (attempt > maxRetries) {
-        break;
+        break
       }
 
       // Don't retry if error is not retryable
       if (!isRetryableFn(error)) {
-        throw error;
+        throw error
       }
 
       // Calculate delay
@@ -394,24 +395,24 @@ export async function withRetry<T>(
         attempt,
         baseDelay,
         maxDelay,
-        backoffMultiplier
-      );
+        backoffMultiplier,
+      )
 
       // Call onRetry callback
       if (onRetry) {
-        onRetry(attempt, error, delay);
+        onRetry(attempt, error, delay)
       }
 
       // Wait before retrying
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      await new Promise(resolve => setTimeout(resolve, delay))
     }
   }
 
   throw new RetryExhaustedError(
     `Operation failed after ${maxRetries + 1} attempts`,
     maxRetries + 1,
-    lastError
-  );
+    lastError,
+  )
 }
 
 // ============================================================================
@@ -441,11 +442,11 @@ export async function withRetry<T>(
  */
 export async function withResilience<T>(
   operation: () => Promise<T>,
-  options: ResilienceOptions = {}
+  options: ResilienceOptions = {},
 ): Promise<T> {
-  const enableRetry = options.enableRetry ?? DEFAULT_RESILIENCE_OPTIONS.enableRetry;
-  const enableTimeout =
-    options.enableTimeout ?? DEFAULT_RESILIENCE_OPTIONS.enableTimeout;
+  const enableRetry = options.enableRetry ?? DEFAULT_RESILIENCE_OPTIONS.enableRetry
+  const enableTimeout
+    = options.enableTimeout ?? DEFAULT_RESILIENCE_OPTIONS.enableTimeout
 
   // Build the operation with optional timeout
   const operationWithTimeout = enableTimeout
@@ -454,7 +455,7 @@ export async function withResilience<T>(
           timeout: options.timeout,
           timeoutMessage: options.timeoutMessage,
         })
-    : operation;
+    : operation
 
   // Wrap with optional retry
   if (enableRetry) {
@@ -465,10 +466,10 @@ export async function withResilience<T>(
       backoffMultiplier: options.backoffMultiplier,
       isRetryable: options.isRetryable,
       onRetry: options.onRetry,
-    });
+    })
   }
 
-  return operationWithTimeout();
+  return operationWithTimeout()
 }
 
 // ============================================================================
@@ -489,43 +490,43 @@ export async function withResilience<T>(
  * ```
  */
 export function createCancellableDelay(ms: number): {
-  promise: Promise<void>;
-  cancel: () => void;
+  promise: Promise<void>
+  cancel: () => void
 } {
-  let timeoutId: number | null = null;
-  let rejectFn: ((reason: Error) => void) | null = null;
+  let timeoutId: number | null = null
+  let rejectFn: ((reason: Error) => void) | null = null
 
   const promise = new Promise<void>((resolve, reject) => {
-    rejectFn = reject;
+    rejectFn = reject
     // Using window.setTimeout for browser environment to get numeric ID
-    timeoutId = window.setTimeout(resolve, ms);
-  });
+    timeoutId = window.setTimeout(resolve, ms)
+  })
 
   const cancel = () => {
     if (timeoutId !== null) {
-      window.clearTimeout(timeoutId);
-      timeoutId = null;
+      window.clearTimeout(timeoutId)
+      timeoutId = null
     }
     if (rejectFn) {
-      rejectFn(new Error("Delay cancelled"));
+      rejectFn(new Error('Delay cancelled'))
     }
-  };
+  }
 
-  return { promise, cancel };
+  return { promise, cancel }
 }
 
 /**
  * Check if an error is a TimeoutError
  */
 export function isTimeoutError(error: unknown): error is TimeoutError {
-  return error instanceof TimeoutError;
+  return error instanceof TimeoutError
 }
 
 /**
  * Check if an error is a RetryExhaustedError
  */
 export function isRetryExhaustedError(
-  error: unknown
+  error: unknown,
 ): error is RetryExhaustedError {
-  return error instanceof RetryExhaustedError;
+  return error instanceof RetryExhaustedError
 }

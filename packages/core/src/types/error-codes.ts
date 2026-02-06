@@ -57,12 +57,12 @@ export const ERROR_CODES = {
 
   // Generic errors
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
-} as const;
+} as const
 
 /**
  * Union type of all error codes
  */
-export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
+export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES]
 
 // ============================================================================
 // Error Code Categories
@@ -75,7 +75,7 @@ export const RETRYABLE_ERROR_CODES = [
   ERROR_CODES.CONNECTION_FAILED,
   ERROR_CODES.CONNECTION_LOST,
   ERROR_CODES.TIMEOUT,
-] as const;
+] as const
 
 /**
  * Connection-related errors
@@ -86,7 +86,7 @@ export const CONNECTION_ERROR_CODES = [
   ERROR_CODES.TIMEOUT,
   ERROR_CODES.RETRY_EXHAUSTED,
   ERROR_CODES.WEBSOCKET_NOT_SUPPORTED,
-] as const;
+] as const
 
 /**
  * Certificate-related errors
@@ -96,7 +96,7 @@ export const CERTIFICATE_ERROR_CODES = [
   ERROR_CODES.CERTIFICATE_EXPIRED,
   ERROR_CODES.CERTIFICATE_NOT_YET_VALID,
   ERROR_CODES.KEY_LOAD_ERROR,
-] as const;
+] as const
 
 /**
  * Device-related errors (hardware tokens, readers)
@@ -105,7 +105,7 @@ export const DEVICE_ERROR_CODES = [
   ERROR_CODES.NO_READER,
   ERROR_CODES.CARD_NOT_FOUND,
   ERROR_CODES.DEVICE_NOT_FOUND,
-] as const;
+] as const
 
 /**
  * Application-level errors (E-IMZO installation, version)
@@ -115,17 +115,17 @@ export const APPLICATION_ERROR_CODES = [
   ERROR_CODES.VERSION_OUTDATED,
   ERROR_CODES.VERSION_UNDEFINED,
   ERROR_CODES.CRYPTO_API_ERROR,
-] as const;
+] as const
 
 // ============================================================================
 // Category Type Guards
 // ============================================================================
 
-type RetryableErrorCode = typeof RETRYABLE_ERROR_CODES[number];
-type ConnectionErrorCode = typeof CONNECTION_ERROR_CODES[number];
-type CertificateErrorCode = typeof CERTIFICATE_ERROR_CODES[number];
-type DeviceErrorCode = typeof DEVICE_ERROR_CODES[number];
-type ApplicationErrorCode = typeof APPLICATION_ERROR_CODES[number];
+type RetryableErrorCode = typeof RETRYABLE_ERROR_CODES[number]
+type ConnectionErrorCode = typeof CONNECTION_ERROR_CODES[number]
+type CertificateErrorCode = typeof CERTIFICATE_ERROR_CODES[number]
+type DeviceErrorCode = typeof DEVICE_ERROR_CODES[number]
+type ApplicationErrorCode = typeof APPLICATION_ERROR_CODES[number]
 
 /**
  * Checks if an error code is retryable
@@ -142,7 +142,7 @@ type ApplicationErrorCode = typeof APPLICATION_ERROR_CODES[number];
  * ```
  */
 export function isRetryableCode(code: ErrorCode): code is RetryableErrorCode {
-  return (RETRYABLE_ERROR_CODES as readonly ErrorCode[]).includes(code);
+  return (RETRYABLE_ERROR_CODES as readonly ErrorCode[]).includes(code)
 }
 
 /**
@@ -152,7 +152,7 @@ export function isRetryableCode(code: ErrorCode): code is RetryableErrorCode {
  * @returns True if the error is connection-related
  */
 export function isConnectionErrorCode(code: ErrorCode): code is ConnectionErrorCode {
-  return (CONNECTION_ERROR_CODES as readonly ErrorCode[]).includes(code);
+  return (CONNECTION_ERROR_CODES as readonly ErrorCode[]).includes(code)
 }
 
 /**
@@ -162,7 +162,7 @@ export function isConnectionErrorCode(code: ErrorCode): code is ConnectionErrorC
  * @returns True if the error is certificate-related
  */
 export function isCertificateErrorCode(code: ErrorCode): code is CertificateErrorCode {
-  return (CERTIFICATE_ERROR_CODES as readonly ErrorCode[]).includes(code);
+  return (CERTIFICATE_ERROR_CODES as readonly ErrorCode[]).includes(code)
 }
 
 /**
@@ -172,7 +172,7 @@ export function isCertificateErrorCode(code: ErrorCode): code is CertificateErro
  * @returns True if the error is device-related
  */
 export function isDeviceErrorCode(code: ErrorCode): code is DeviceErrorCode {
-  return (DEVICE_ERROR_CODES as readonly ErrorCode[]).includes(code);
+  return (DEVICE_ERROR_CODES as readonly ErrorCode[]).includes(code)
 }
 
 /**
@@ -182,7 +182,7 @@ export function isDeviceErrorCode(code: ErrorCode): code is DeviceErrorCode {
  * @returns True if the error is application-related
  */
 export function isApplicationErrorCode(code: ErrorCode): code is ApplicationErrorCode {
-  return (APPLICATION_ERROR_CODES as readonly ErrorCode[]).includes(code);
+  return (APPLICATION_ERROR_CODES as readonly ErrorCode[]).includes(code)
 }
 
 // ============================================================================
@@ -213,7 +213,7 @@ export const ERROR_CODE_DESCRIPTIONS: Record<ErrorCode, string> = {
   [ERROR_CODES.SIGNING_ERROR]: 'Signing operation failed',
   [ERROR_CODES.WEBSOCKET_NOT_SUPPORTED]: 'WebSocket not supported in browser',
   [ERROR_CODES.UNKNOWN_ERROR]: 'An unknown error occurred',
-};
+}
 
 /**
  * Gets a human-readable description for an error code
@@ -222,5 +222,5 @@ export const ERROR_CODE_DESCRIPTIONS: Record<ErrorCode, string> = {
  * @returns Human-readable description
  */
 export function getErrorDescription(code: ErrorCode): string {
-  return ERROR_CODE_DESCRIPTIONS[code];
+  return ERROR_CODE_DESCRIPTIONS[code]
 }

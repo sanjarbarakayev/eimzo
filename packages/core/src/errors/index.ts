@@ -9,11 +9,11 @@
  * ```
  */
 
-export { EIMZOError, type ErrorContext, type EIMZOErrorOptions } from './eimzo-error';
 export {
   AggregateSignError,
-  executeBatch,
   type BatchFailure,
   type BatchResult,
+  executeBatch,
   type ExecuteBatchOptions,
-} from './aggregate-error';
+} from './aggregate-error'
+export { EIMZOError, type EIMZOErrorOptions, type ErrorContext } from './eimzo-error'

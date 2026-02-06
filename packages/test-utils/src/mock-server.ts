@@ -1,10 +1,10 @@
 import type {
-  CAPIWSFunctionDef,
   CAPIWSBaseResponse,
-  CAPIWSVersionResponse,
+  CAPIWSFunctionDef,
+  CAPIWSListCertificatesResponse,
   CAPIWSLoadKeyResponse,
   CAPIWSPkcs7Response,
-  CAPIWSListCertificatesResponse,
+  CAPIWSVersionResponse,
 } from '@eimzo/core'
 
 /**
@@ -51,7 +51,7 @@ class MockEvent {
 class MockCloseEvent extends MockEvent {
   readonly code: number
   readonly reason: string
-  constructor(type: string, init?: { code?: number; reason?: string }) {
+  constructor(type: string, init?: { code?: number, reason?: string }) {
     super(type)
     this.code = init?.code ?? 1000
     this.reason = init?.reason ?? ''
@@ -139,17 +139,17 @@ export class MockWebSocket {
  * Default responses for common CAPIWS operations
  */
 const defaultResponses: Record<string, () => CAPIWSBaseResponse> = {
-  version: (): CAPIWSVersionResponse => ({
+  'version': (): CAPIWSVersionResponse => ({
     success: true,
     major: '3',
     minor: '37',
   }),
 
-  apidoc: (): CAPIWSBaseResponse => ({
+  'apidoc': (): CAPIWSBaseResponse => ({
     success: true,
   }),
 
-  apikey: (): CAPIWSBaseResponse => ({
+  'apikey': (): CAPIWSBaseResponse => ({
     success: true,
   }),
 
@@ -205,7 +205,7 @@ const defaultResponses: Record<string, () => CAPIWSBaseResponse> = {
  */
 function createDefaultMessageHandler(
   customResponses: Record<string, () => CAPIWSBaseResponse> = {},
-  config: MockResponseConfig = {}
+  config: MockResponseConfig = {},
 ): MessageHandler {
   const responses = { ...defaultResponses, ...customResponses }
 

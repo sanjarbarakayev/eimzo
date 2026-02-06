@@ -26,7 +26,7 @@
  * ```
  */
 
-import type { ErrorCode } from './error-codes';
+import type { ErrorCode } from './error-codes'
 
 // ============================================================================
 // Core Types
@@ -36,33 +36,33 @@ import type { ErrorCode } from './error-codes';
  * Success result containing data
  */
 export interface SuccessResult<T> {
-  readonly success: true;
-  readonly data: T;
+  readonly success: true
+  readonly data: T
 }
 
 /**
  * Failure result containing error
  */
 export interface FailureResult<E> {
-  readonly success: false;
-  readonly error: E;
+  readonly success: false
+  readonly error: E
 }
 
 /**
  * Result type: either success with data or failure with error
  */
-export type Result<T, E = EIMZOError> = SuccessResult<T> | FailureResult<E>;
+export type Result<T, E = EIMZOError> = SuccessResult<T> | FailureResult<E>
 
 /**
  * Error context information
  */
 export interface ResultErrorContext {
   /** Operation that failed */
-  operation?: string;
+  operation?: string
   /** Additional parameters */
-  params?: Record<string, unknown>;
+  params?: Record<string, unknown>
   /** Stack trace from original error */
-  stack?: string;
+  stack?: string
 }
 
 /**
@@ -70,15 +70,15 @@ export interface ResultErrorContext {
  */
 export interface EIMZOError {
   /** Error code for programmatic handling */
-  readonly code: ErrorCode;
+  readonly code: ErrorCode
   /** Human-readable error message */
-  readonly message: string;
+  readonly message: string
   /** Additional context about the error */
-  readonly context?: ResultErrorContext;
+  readonly context?: ResultErrorContext
   /** Timestamp when error occurred */
-  readonly timestamp: number;
+  readonly timestamp: number
   /** Original error if wrapping another error */
-  readonly cause?: Error;
+  readonly cause?: Error
 }
 
 // ============================================================================
@@ -97,7 +97,7 @@ export interface EIMZOError {
  * ```
  */
 export function ok<T>(data: T): SuccessResult<T> {
-  return { success: true, data };
+  return { success: true, data }
 }
 
 /**
@@ -112,7 +112,7 @@ export function ok<T>(data: T): SuccessResult<T> {
  * ```
  */
 export function err<E>(error: E): FailureResult<E> {
-  return { success: false, error };
+  return { success: false, error }
 }
 
 /**
@@ -120,9 +120,9 @@ export function err<E>(error: E): FailureResult<E> {
  */
 export interface CreateErrorOptions {
   /** Additional context */
-  context?: ResultErrorContext;
+  context?: ResultErrorContext
   /** Original error that caused this error */
-  cause?: Error;
+  cause?: Error
 }
 
 /**
@@ -145,7 +145,7 @@ export interface CreateErrorOptions {
 export function createEIMZOError(
   code: ErrorCode,
   message: string,
-  options?: CreateErrorOptions
+  options?: CreateErrorOptions,
 ): EIMZOError {
   return {
     code,
@@ -153,7 +153,7 @@ export function createEIMZOError(
     context: options?.context,
     timestamp: Date.now(),
     cause: options?.cause,
-  };
+  }
 }
 
 // ============================================================================
@@ -175,7 +175,7 @@ export function createEIMZOError(
  * ```
  */
 export function isOk<T, E>(result: Result<T, E>): result is SuccessResult<T> {
-  return result.success === true;
+  return result.success === true
 }
 
 /**
@@ -193,7 +193,7 @@ export function isOk<T, E>(result: Result<T, E>): result is SuccessResult<T> {
  * ```
  */
 export function isErr<T, E>(result: Result<T, E>): result is FailureResult<E> {
-  return result.success === false;
+  return result.success === false
 }
 
 // ============================================================================
@@ -214,16 +214,16 @@ export function isErr<T, E>(result: Result<T, E>): result is FailureResult<E> {
  */
 export function unwrap<T, E>(result: Result<T, E>): T {
   if (isOk(result)) {
-    return result.data;
+    return result.data
   }
-  const error = result.error;
+  const error = result.error
   if (error instanceof Error) {
-    throw error;
+    throw error
   }
   if (typeof error === 'object' && error !== null && 'message' in error) {
-    throw new Error((error as { message: string }).message);
+    throw new Error((error as { message: string }).message)
   }
-  throw new Error(String(error));
+  throw new Error(String(error))
 }
 
 /**
@@ -239,7 +239,7 @@ export function unwrap<T, E>(result: Result<T, E>): T {
  * ```
  */
 export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
-  return isOk(result) ? result.data : defaultValue;
+  return isOk(result) ? result.data : defaultValue
 }
 
 /**
@@ -259,9 +259,9 @@ export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
  */
 export function unwrapOrElse<T, E>(
   result: Result<T, E>,
-  fn: (error: E) => T
+  fn: (error: E) => T,
 ): T {
-  return isOk(result) ? result.data : fn(result.error);
+  return isOk(result) ? result.data : fn(result.error)
 }
 
 /**
@@ -278,9 +278,9 @@ export function unwrapOrElse<T, E>(
  */
 export function unwrapErr<T, E>(result: Result<T, E>): E {
   if (isErr(result)) {
-    return result.error;
+    return result.error
   }
-  throw new Error('Called unwrapErr on a success result');
+  throw new Error('Called unwrapErr on a success result')
 }
 
 // ============================================================================
@@ -301,9 +301,9 @@ export function unwrapErr<T, E>(result: Result<T, E>): E {
  */
 export function map<T, U, E>(
   result: Result<T, E>,
-  fn: (value: T) => U
+  fn: (value: T) => U,
 ): Result<U, E> {
-  return isOk(result) ? ok(fn(result.data)) : result;
+  return isOk(result) ? ok(fn(result.data)) : result
 }
 
 /**
@@ -323,9 +323,9 @@ export function map<T, U, E>(
  */
 export function mapErr<T, E, F>(
   result: Result<T, E>,
-  fn: (error: E) => F
+  fn: (error: E) => F,
 ): Result<T, F> {
-  return isErr(result) ? err(fn(result.error)) : result;
+  return isErr(result) ? err(fn(result.error)) : result
 }
 
 /**
@@ -344,9 +344,9 @@ export function mapErr<T, E, F>(
  */
 export function andThen<T, U, E>(
   result: Result<T, E>,
-  fn: (value: T) => Result<U, E>
+  fn: (value: T) => Result<U, E>,
 ): Result<U, E> {
-  return isOk(result) ? fn(result.data) : result;
+  return isOk(result) ? fn(result.data) : result
 }
 
 /**
@@ -365,9 +365,9 @@ export function andThen<T, U, E>(
  */
 export function orElse<T, E, F>(
   result: Result<T, E>,
-  fn: (error: E) => Result<T, F>
+  fn: (error: E) => Result<T, F>,
 ): Result<T, F> {
-  return isOk(result) ? result : fn(result.error);
+  return isOk(result) ? result : fn(result.error)
 }
 
 // ============================================================================
@@ -391,21 +391,22 @@ export function orElse<T, E, F>(
  */
 export async function fromPromise<T>(
   promise: Promise<T>,
-  errorMapper?: (error: unknown) => EIMZOError
+  errorMapper?: (error: unknown) => EIMZOError,
 ): Promise<Result<T, EIMZOError>> {
   try {
-    const data = await promise;
-    return ok(data);
-  } catch (error) {
+    const data = await promise
+    return ok(data)
+  }
+  catch (error) {
     if (errorMapper) {
-      return err(errorMapper(error));
+      return err(errorMapper(error))
     }
-    const message = error instanceof Error ? error.message : String(error);
+    const message = error instanceof Error ? error.message : String(error)
     return err(
       createEIMZOError('UNKNOWN_ERROR' as ErrorCode, message, {
         cause: error instanceof Error ? error : undefined,
-      })
-    );
+      }),
+    )
   }
 }
 
@@ -425,16 +426,16 @@ export async function fromPromise<T>(
  * ```
  */
 export function toPromise<T, E extends Error | EIMZOError>(
-  result: Result<T, E>
+  result: Result<T, E>,
 ): Promise<T> {
   if (isOk(result)) {
-    return Promise.resolve(result.data);
+    return Promise.resolve(result.data)
   }
-  const error = result.error;
+  const error = result.error
   if (error instanceof Error) {
-    return Promise.reject(error);
+    return Promise.reject(error)
   }
-  return Promise.reject(new Error(error.message));
+  return Promise.reject(new Error(error.message))
 }
 
 // ============================================================================
@@ -457,14 +458,14 @@ export function toPromise<T, E extends Error | EIMZOError>(
  * ```
  */
 export function collect<T, E>(results: Result<T, E>[]): Result<T[], E> {
-  const values: T[] = [];
+  const values: T[] = []
   for (const result of results) {
     if (isErr(result)) {
-      return result;
+      return result
     }
-    values.push(result.data);
+    values.push(result.data)
   }
-  return ok(values);
+  return ok(values)
 }
 
 /**
@@ -480,16 +481,17 @@ export function collect<T, E>(results: Result<T, E>[]): Result<T[], E> {
  * ```
  */
 export function partition<T, E>(
-  results: Result<T, E>[]
-): { ok: T[]; err: E[] } {
-  const okValues: T[] = [];
-  const errValues: E[] = [];
+  results: Result<T, E>[],
+): { ok: T[], err: E[] } {
+  const okValues: T[] = []
+  const errValues: E[] = []
   for (const result of results) {
     if (isOk(result)) {
-      okValues.push(result.data);
-    } else {
-      errValues.push(result.error);
+      okValues.push(result.data)
+    }
+    else {
+      errValues.push(result.error)
     }
   }
-  return { ok: okValues, err: errValues };
+  return { ok: okValues, err: errValues }
 }

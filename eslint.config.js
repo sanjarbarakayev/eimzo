@@ -1,85 +1,92 @@
-import eslint from '@eslint/js'
-import tseslint from 'typescript-eslint'
-import globals from 'globals'
+import antfu from '@antfu/eslint-config'
 
-export default tseslint.config(
-  eslint.configs.recommended,
-  // Use recommended (not strict) to allow gradual improvement
-  ...tseslint.configs.recommendedTypeChecked,
-  {
-    languageOptions: {
-      globals: { ...globals.browser, ...globals.node },
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-    rules: {
-      // Core rules
-      'no-console': 'warn', // Warn initially, existing code has console.log for debugging
-      'no-debugger': 'error',
-      'no-async-promise-executor': 'warn', // Warn, some patterns need refactoring
+export default antfu({
+  // Enable TypeScript and Vue support
+  typescript: true,
+  vue: true,
 
-      // TypeScript rules - strict (warnings initially for existing code)
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
-      '@typescript-eslint/unbound-method': 'off',
-      '@typescript-eslint/no-unsafe-function-type': 'warn',
-      '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-misused-promises': 'warn', // Warn initially
-      '@typescript-eslint/await-thenable': 'error',
-
-      // TypeScript rules - gradual adoption (warnings or off)
-      '@typescript-eslint/explicit-function-return-type': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/strict-boolean-expressions': 'off',
-      '@typescript-eslint/no-unnecessary-condition': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'warn',
-      '@typescript-eslint/no-unsafe-member-access': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
-      '@typescript-eslint/no-unsafe-return': 'warn',
-      '@typescript-eslint/no-unsafe-call': 'warn',
-      '@typescript-eslint/restrict-template-expressions': 'warn',
-      '@typescript-eslint/no-inferrable-types': 'off',
-      '@typescript-eslint/prefer-nullish-coalescing': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'warn',
-      '@typescript-eslint/prefer-promise-reject-errors': 'warn',
-      '@typescript-eslint/no-confusing-void-expression': 'off',
-      '@typescript-eslint/consistent-generic-constructors': 'off',
-      '@typescript-eslint/prefer-optional-chain': 'off',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
-      '@typescript-eslint/require-await': 'warn',
-
-      // Allow control characters in regex (needed for binary data handling)
-      'no-control-regex': 'off',
-    },
+  // Stylistic rules (replaces Prettier)
+  stylistic: {
+    indent: 2,
+    quotes: 'single',
+    semi: false,
   },
-  {
-    // Test files can be more relaxed
-    files: ['**/*.test.ts', '**/__tests__/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/require-await': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-    },
+
+  // Ignore patterns
+  ignores: [
+    '**/dist/**',
+    '**/node_modules/**',
+    '**/coverage/**',
+    '**/.turbo/**',
+    '**/vitest.config.ts',
+    '**/tsup.config.ts',
+    '**/.claude/**',
+    '**/docs/**',
+    '**/*.md',
+  ],
+}, {
+  // Custom rules
+  rules: {
+    // Relaxed rules for existing codebase
+    'no-console': 'warn',
+    'ts/explicit-function-return-type': 'off',
+    'ts/no-explicit-any': 'warn',
+    'ts/strict-boolean-expressions': 'off',
+    'ts/no-unsafe-assignment': 'off',
+    'ts/no-unsafe-member-access': 'off',
+    'ts/no-unsafe-argument': 'off',
+    'ts/no-unsafe-return': 'off',
+    'ts/no-unsafe-call': 'off',
+    'ts/no-use-before-define': 'off',
+    'ts/no-unsafe-function-type': 'off',
+    'ts/no-empty-object-type': 'off',
+    'unused-imports/no-unused-vars': 'warn',
+    'antfu/no-top-level-await': 'off',
+
+    // Allow control characters in regex (needed for binary data)
+    'no-control-regex': 'off',
+
+    // Relax import ordering for existing codebase
+    'perfectionist/sort-imports': 'off',
+    'perfectionist/sort-named-imports': 'off',
+    'perfectionist/sort-named-exports': 'off',
+    'import/consistent-type-specifier-style': 'off',
+
+    // Relax JSDoc requirements
+    'jsdoc/check-param-names': 'off',
+
+    // Test-specific rules
+    'test/prefer-lowercase-title': 'off',
+
+    // Node.js specific
+    'node/handle-callback-err': 'off',
+    'node/prefer-global/process': 'off',
+    'node/prefer-global/buffer': 'off',
+
+    // Promise handling
+    'prefer-promise-reject-errors': 'off',
+    'no-async-promise-executor': 'off',
+
+    // Regex patterns (UTF-8 handling in binary data)
+    'regexp/no-obscure-range': 'off',
+
+    // Native prototype extension (used in existing code)
+    'no-extend-native': 'off',
+
+    // Assignment in conditions (used in while loops)
+    'no-cond-assign': 'off',
+
+    // Binary operator indentation
+    'style/indent-binary-ops': 'off',
   },
-  {
-    ignores: [
-      '**/dist/**',
-      '**/node_modules/**',
-      '**/*.js',
-      '**/*.cjs',
-      '**/*.mjs',
-      '**/coverage/**',
-      '**/.turbo/**',
-      '**/vitest.config.ts',
-      '**/tsup.config.ts',
-    ],
-  }
-)
+}, {
+  // Test files can be more relaxed
+  files: ['**/*.test.ts', '**/__tests__/**/*.ts'],
+  rules: {
+    'ts/no-explicit-any': 'off',
+    'ts/no-unsafe-assignment': 'off',
+    'ts/no-unsafe-member-access': 'off',
+    'ts/no-unsafe-argument': 'off',
+    'unused-imports/no-unused-vars': 'off',
+  },
+})

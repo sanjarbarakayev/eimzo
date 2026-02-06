@@ -17,8 +17,9 @@
  * ```
  */
 
-import { ERROR_CODES, type ErrorCode } from '../types/error-codes';
-import { EIMZOError, type ErrorContext } from './eimzo-error';
+import type { ErrorContext } from './eimzo-error'
+import { ERROR_CODES } from '../types/error-codes'
+import { EIMZOError } from './eimzo-error'
 
 // ============================================================================
 // Types
@@ -29,11 +30,11 @@ import { EIMZOError, type ErrorContext } from './eimzo-error';
  */
 export interface BatchFailure<TItem = unknown> {
   /** Index of the failed item in the original array */
-  readonly index: number;
+  readonly index: number
   /** The item that failed */
-  readonly item: TItem;
+  readonly item: TItem
   /** The error that occurred */
-  readonly error: EIMZOError;
+  readonly error: EIMZOError
 }
 
 /**
@@ -41,15 +42,15 @@ export interface BatchFailure<TItem = unknown> {
  */
 export interface BatchResult<TSuccess, TItem = unknown> {
   /** Successful results in order of completion */
-  readonly successes: readonly TSuccess[];
+  readonly successes: readonly TSuccess[]
   /** Failed items with their errors */
-  readonly failures: readonly BatchFailure<TItem>[];
+  readonly failures: readonly BatchFailure<TItem>[]
   /** True if all items succeeded */
-  readonly allSucceeded: boolean;
+  readonly allSucceeded: boolean
   /** True if all items failed */
-  readonly allFailed: boolean;
+  readonly allFailed: boolean
   /** Total number of items processed */
-  readonly total: number;
+  readonly total: number
 }
 
 /**
@@ -57,9 +58,9 @@ export interface BatchResult<TSuccess, TItem = unknown> {
  */
 export interface ExecuteBatchOptions {
   /** Stop on first error instead of collecting all errors */
-  readonly stopOnFirstError?: boolean;
+  readonly stopOnFirstError?: boolean
   /** Correlation ID for tracing the entire batch operation */
-  readonly correlationId?: string;
+  readonly correlationId?: string
 }
 
 // ============================================================================
@@ -86,19 +87,19 @@ export interface ExecuteBatchOptions {
  */
 export class AggregateSignError extends EIMZOError {
   /** Individual signing failures */
-  readonly failures: readonly BatchFailure<string>[];
+  readonly failures: readonly BatchFailure<string>[]
 
   /** Signatures that were successfully created */
-  readonly successfulSignatures: readonly string[];
+  readonly successfulSignatures: readonly string[]
 
   constructor(
     message: string,
     failures: readonly BatchFailure<string>[],
     successfulSignatures: readonly string[],
     options?: {
-      readonly context?: Partial<ErrorContext>;
-      readonly correlationId?: string;
-    }
+      readonly context?: Partial<ErrorContext>
+      readonly correlationId?: string
+    },
   ) {
     super(ERROR_CODES.SIGNING_ERROR, message, {
       context: {
@@ -112,14 +113,14 @@ export class AggregateSignError extends EIMZOError {
         },
       },
       correlationId: options?.correlationId,
-    });
+    })
 
     // Set prototype for proper instanceof checks
-    Object.setPrototypeOf(this, AggregateSignError.prototype);
+    Object.setPrototypeOf(this, AggregateSignError.prototype)
 
-    this.name = 'AggregateSignError';
-    this.failures = failures;
-    this.successfulSignatures = successfulSignatures;
+    this.name = 'AggregateSignError'
+    this.failures = failures
+    this.successfulSignatures = successfulSignatures
   }
 
   /**
@@ -128,29 +129,29 @@ export class AggregateSignError extends EIMZOError {
    * @returns BatchResult representing the partial failure
    */
   toBatchResult(): BatchResult<string, string> {
-    const total = this.failures.length + this.successfulSignatures.length;
+    const total = this.failures.length + this.successfulSignatures.length
     return {
       successes: this.successfulSignatures,
       failures: this.failures,
       allSucceeded: this.failures.length === 0,
       allFailed: this.successfulSignatures.length === 0,
       total,
-    };
+    }
   }
 
   /**
    * Creates a user-friendly summary message
    */
   getSummary(): string {
-    const total = this.failures.length + this.successfulSignatures.length;
-    return `Batch signing partially failed: ${this.successfulSignatures.length}/${total} succeeded, ${this.failures.length}/${total} failed`;
+    const total = this.failures.length + this.successfulSignatures.length
+    return `Batch signing partially failed: ${this.successfulSignatures.length}/${total} succeeded, ${this.failures.length}/${total} failed`
   }
 
   /**
    * Gets failure indices for debugging
    */
   getFailedIndices(): readonly number[] {
-    return this.failures.map((f) => f.index);
+    return this.failures.map(f => f.index)
   }
 
   /**
@@ -159,21 +160,21 @@ export class AggregateSignError extends EIMZOError {
   override toJSON(): Record<string, unknown> {
     return {
       ...super.toJSON(),
-      failures: this.failures.map((f) => ({
+      failures: this.failures.map(f => ({
         index: f.index,
         item: f.item,
         error: f.error.toJSON(),
       })),
       successfulSignatures: this.successfulSignatures,
       summary: this.getSummary(),
-    };
+    }
   }
 
   /**
    * Type guard for AggregateSignError
    */
   static isAggregateSignError(error: unknown): error is AggregateSignError {
-    return error instanceof AggregateSignError;
+    return error instanceof AggregateSignError
   }
 }
 
@@ -185,9 +186,9 @@ export class AggregateSignError extends EIMZOError {
  * Generates a unique batch correlation ID
  */
 function generateBatchCorrelationId(): string {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 10);
-  return `batch-${timestamp}-${random}`;
+  const timestamp = Date.now().toString(36)
+  const random = Math.random().toString(36).substring(2, 10)
+  return `batch-${timestamp}-${random}`
 }
 
 /**
@@ -219,35 +220,36 @@ function generateBatchCorrelationId(): string {
 export async function executeBatch<TItem, TResult>(
   items: readonly TItem[],
   operation: (item: TItem, index: number) => Promise<TResult>,
-  options?: ExecuteBatchOptions
+  options?: ExecuteBatchOptions,
 ): Promise<BatchResult<TResult, TItem>> {
-  const correlationId = options?.correlationId ?? generateBatchCorrelationId();
-  const successes: TResult[] = [];
-  const failures: BatchFailure<TItem>[] = [];
+  const correlationId = options?.correlationId ?? generateBatchCorrelationId()
+  const successes: TResult[] = []
+  const failures: BatchFailure<TItem>[] = []
 
   for (let index = 0; index < items.length; index++) {
-    const item = items[index];
+    const item = items[index]
 
     try {
-      const result = await operation(item, index);
-      successes.push(result);
-    } catch (error) {
+      const result = await operation(item, index)
+      successes.push(result)
+    }
+    catch (error) {
       const eimzoError = EIMZOError.from(error, {
         operation: 'batchItem',
         metadata: {
           batchIndex: index,
           batchCorrelationId: correlationId,
         },
-      });
+      })
 
       failures.push({
         index,
         item,
         error: eimzoError,
-      });
+      })
 
       if (options?.stopOnFirstError) {
-        break;
+        break
       }
     }
   }
@@ -258,5 +260,5 @@ export async function executeBatch<TItem, TResult>(
     allSucceeded: failures.length === 0,
     allFailed: successes.length === 0 && items.length > 0,
     total: items.length,
-  };
+  }
 }

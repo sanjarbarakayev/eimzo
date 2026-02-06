@@ -16,24 +16,25 @@
  * ```
  */
 
+import type { PropType } from 'vue'
+import { EIMZOError } from '@eimzo/core'
 import {
   defineComponent,
-  ref,
-  provide,
   onErrorCaptured,
+
+  provide,
+  ref,
   watch,
-  type PropType,
-} from 'vue';
-import { EIMZOError } from '@eimzo/core';
-import { ERROR_BOUNDARY_KEY } from './error-boundary-types';
+} from 'vue'
+import { ERROR_BOUNDARY_KEY } from './error-boundary-types'
 
 // Re-export types for backwards compatibility
 export type {
-  ErrorBoundarySlotProps,
   ErrorBoundaryContext,
+  ErrorBoundarySlotProps,
   ESignatureErrorBoundaryProps as Props,
-} from './error-boundary-types';
-export { ERROR_BOUNDARY_KEY } from './error-boundary-types';
+} from './error-boundary-types'
+export { ERROR_BOUNDARY_KEY } from './error-boundary-types'
 
 // ============================================================================
 // Component
@@ -64,35 +65,35 @@ export default defineComponent({
   },
 
   setup(props, { emit, expose }) {
-    const currentError = ref<EIMZOError | null>(null);
-    const retryCount = ref(0);
-    const slotKey = ref(0);
+    const currentError = ref<EIMZOError | null>(null)
+    const retryCount = ref(0)
+    const slotKey = ref(0)
 
     function retry(): void {
       if (retryCount.value >= props.maxRetries) {
-        return;
+        return
       }
 
-      retryCount.value++;
-      currentError.value = null;
-      slotKey.value++;
+      retryCount.value++
+      currentError.value = null
+      slotKey.value++
 
-      emit('retry', retryCount.value);
+      emit('retry', retryCount.value)
     }
 
     function reset(): void {
-      currentError.value = null;
-      retryCount.value = 0;
-      slotKey.value++;
+      currentError.value = null
+      retryCount.value = 0
+      slotKey.value++
 
-      emit('reset');
+      emit('reset')
     }
 
     // Error handling
     onErrorCaptured((error: unknown, _instance, info) => {
       // Check if error should be caught
       if (!props.shouldCatch(error)) {
-        return true; // Let error propagate
+        return true // Let error propagate
       }
 
       // Convert to EIMZOError
@@ -101,42 +102,42 @@ export default defineComponent({
         : EIMZOError.from(error, {
             operation: 'component',
             metadata: { componentInfo: info },
-          });
+          })
 
-      currentError.value = eimzoError;
-      emit('error', eimzoError);
+      currentError.value = eimzoError
+      emit('error', eimzoError)
 
       // Prevent error from propagating
-      return false;
-    });
+      return false
+    })
 
     // Auto-reset
-    let autoResetTimer: ReturnType<typeof setTimeout> | null = null;
+    let autoResetTimer: ReturnType<typeof setTimeout> | null = null
 
     watch(
       () => currentError.value,
       (error) => {
         // Clear any existing timer
         if (autoResetTimer) {
-          clearTimeout(autoResetTimer);
-          autoResetTimer = null;
+          clearTimeout(autoResetTimer)
+          autoResetTimer = null
         }
 
         // Set up auto-reset if enabled and there's an error
         if (error && props.autoResetMs > 0) {
           autoResetTimer = setTimeout(() => {
-            reset();
-          }, props.autoResetMs);
+            reset()
+          }, props.autoResetMs)
         }
-      }
-    );
+      },
+    )
 
     // Provide context
     provide(ERROR_BOUNDARY_KEY, {
       hasError: currentError.value !== null,
       triggerRetry: retry,
       triggerReset: reset,
-    });
+    })
 
     // Expose for template refs
     expose({
@@ -144,7 +145,7 @@ export default defineComponent({
       retryCount,
       retry,
       reset,
-    });
+    })
 
     return {
       currentError,
@@ -152,9 +153,9 @@ export default defineComponent({
       slotKey,
       retry,
       reset,
-    };
+    }
   },
-});
+})
 </script>
 
 <template>

@@ -1,5 +1,5 @@
-import type { Certificate, PfxCertificate, FtjcCertificate } from '@eimzo/core'
-import { mockPfxCertificate, mockFtjcCertificate } from '../fixtures/certificates'
+import type { Certificate, FtjcCertificate, PfxCertificate } from '@eimzo/core'
+import { mockFtjcCertificate, mockPfxCertificate } from '../fixtures/certificates'
 
 /**
  * Test client configuration
@@ -65,7 +65,7 @@ export class TestEIMZOClient {
   /**
    * Simulate checking E-IMZO version
    */
-  async checkVersion(): Promise<{ major: number; minor: number }> {
+  async checkVersion(): Promise<{ major: number, minor: number }> {
     await this.simulateDelay()
     this.checkFailure()
     return { major: 3, minor: 37 }
@@ -127,7 +127,7 @@ export class TestEIMZOClient {
         keyId,
         data: data.slice(0, 20),
         timestamp: new Date().toISOString(),
-      })
+      }),
     )
 
     return mockSignature
@@ -139,7 +139,7 @@ export class TestEIMZOClient {
   async isTokenPluggedIn(): Promise<boolean> {
     await this.simulateDelay()
     this.checkFailure()
-    return this.certificates.some((c) => c.type === 'ftjc')
+    return this.certificates.some(c => c.type === 'ftjc')
   }
 
   /**
@@ -155,7 +155,7 @@ export class TestEIMZOClient {
   private async simulateDelay(): Promise<void> {
     const delay = this.config.delay ?? 0
     if (delay > 0) {
-      await new Promise((resolve) => globalThis.setTimeout(resolve, delay))
+      await new Promise(resolve => globalThis.setTimeout(resolve, delay))
     }
   }
 

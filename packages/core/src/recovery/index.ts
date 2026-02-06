@@ -22,19 +22,19 @@
  * ```
  */
 
-export type {
-  RecoveryStrategy,
-  RecoveryContext,
-  RecoveryResult,
-  RecoveryClient,
-} from './types';
-
-export { RecoveryExecutor, type RecoveryExecutorOptions } from './executor';
+export { RecoveryExecutor, type RecoveryExecutorOptions } from './executor'
 
 export {
-  reconnectStrategy,
   certificateRefreshStrategy,
-  versionCheckStrategy,
-  DEFAULT_RECOVERY_STRATEGIES,
   createStrategy,
-} from './strategies';
+  DEFAULT_RECOVERY_STRATEGIES,
+  reconnectStrategy,
+  versionCheckStrategy,
+} from './strategies'
+
+export type {
+  RecoveryClient,
+  RecoveryContext,
+  RecoveryResult,
+  RecoveryStrategy,
+} from './types'
