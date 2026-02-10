@@ -65,7 +65,7 @@
   },
   "peerDependencies": {
     "@vue/devtools-api": "^6.6.0",
-    "vue": "^3.3.0"
+    "vue": "^3.5.28"
   },
   "peerDependenciesMeta": {
     "@vue/devtools-api": {
@@ -84,7 +84,7 @@
     "typescript": "^5.3.0",
     "unplugin-vue": "^7.1.1",
     "vitest": "^4.0.18",
-    "vue": "^3.3.0",
-    "vue-tsc": "^2.0.0"
+    "vue": "^3.5.28",
+    "vue-tsc": "^3.2.4"
   }
 }
