@@ -71,7 +71,7 @@ jobs:
         run: pnpm build
 
       - name: Pack packages
-        run: pnpm pack --recursive
+        run: pnpm --filter './packages/*' exec pnpm pack
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
