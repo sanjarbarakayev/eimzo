@@ -39,3 +39,9 @@ playwright-report
 
 # Package tarballs
 *.tgz
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# VitePress cache
+.vitepress/cache
