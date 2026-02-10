@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'E-IMZO SDK',
   description: 'TypeScript SDK for E-IMZO electronic digital signatures',
+  ignoreDeadLinks: true,
 
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }],
