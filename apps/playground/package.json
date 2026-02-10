@@ -11,7 +11,7 @@
   "dependencies": {
     "@eimzo/core": "workspace:*",
     "@eimzo/vue": "workspace:*",
-    "pinia": "^2.3.0",
+    "pinia": "^3.0.4",
     "vue": "^3.5.0"
   },
   "devDependencies": {
