@@ -49,6 +49,10 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "publishConfig": {
+    "provenance": true,
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup && cp src/index.d.ts dist/index.d.ts && cp src/index.d.ts dist/index.d.cts",
     "dev": "tsup --watch",

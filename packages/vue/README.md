@@ -1,8 +1,10 @@
-# Vue E-Signature
+# @eimzo/vue
 
-[![npm version](https://img.shields.io/npm/v/@eimzo/vue.svg)](https://www.npmjs.com/package/@eimzo/vue)
-[![npm downloads](https://img.shields.io/npm/dm/@eimzo/vue.svg)](https://www.npmjs.com/package/@eimzo/vue)
-[![license](https://img.shields.io/npm/l/@eimzo/vue.svg)](https://github.com/sanjarbarakayev/vue-esignature/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@eimzo/vue)](https://www.npmjs.com/package/@eimzo/vue)
+[![npm downloads](https://img.shields.io/npm/dm/@eimzo/vue)](https://www.npmjs.com/package/@eimzo/vue)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@eimzo/vue)](https://bundlephobia.com/package/@eimzo/vue)
+[![license](https://img.shields.io/npm/l/@eimzo/vue)](https://github.com/sanjarbarakayev/eimzo/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 Vue 3 plugin for **E-IMZO** electronic digital signature (EDS) integration - Uzbekistan's national digital signature system.
 
