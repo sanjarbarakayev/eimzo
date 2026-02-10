@@ -22,8 +22,8 @@ npm install @eimzo/vue
 ```
 
 ```typescript
-import { createApp } from 'vue'
 import { VueESignature } from '@eimzo/vue'
+import { createApp } from 'vue'
 
 const app = createApp(App)
 app.use(VueESignature)
@@ -52,7 +52,7 @@ npm install @eimzo/core
 ```
 
 ```typescript
-import { EIMZOClient, CAPIWS } from '@eimzo/core'
+import { CAPIWS, EIMZOClient } from '@eimzo/core'
 
 // Use low-level client directly
 ```

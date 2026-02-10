@@ -7,97 +7,98 @@
   Source: https://github.com/sanjarbarakayev/vue-esignature/tree/main/examples/components
 -->
 <script setup lang="ts">
-import { ref, computed } from "vue";
 import type {
   Certificate,
-  PfxCertificate,
   FtjcCertificate,
-} from "@eimzo/vue";
+  PfxCertificate,
+} from '@eimzo/vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
-  certificates: Certificate[];
-  modelValue: Certificate | null;
-  disabled?: boolean;
-  compact?: boolean;
-}>();
+  certificates: Certificate[]
+  modelValue: Certificate | null
+  disabled?: boolean
+  compact?: boolean
+}>()
 
 const emit = defineEmits<{
-  "update:modelValue": [cert: Certificate | null];
-  select: [cert: Certificate];
-}>();
+  'update:modelValue': [cert: Certificate | null]
+  'select': [cert: Certificate]
+}>()
 
-type FilterType = "all" | "pfx" | "ftjc";
+type FilterType = 'all' | 'pfx' | 'ftjc'
 
-const filterType = ref<FilterType>("all");
-const searchQuery = ref("");
-const showExpired = ref(false);
+const filterType = ref<FilterType>('all')
+const searchQuery = ref('')
+const showExpired = ref(false)
 
 const filteredCertificates = computed(() => {
   return props.certificates.filter((cert) => {
-    if (filterType.value !== "all" && cert.type !== filterType.value) {
-      return false;
+    if (filterType.value !== 'all' && cert.type !== filterType.value) {
+      return false
     }
     if (!showExpired.value && isExpired(cert)) {
-      return false;
+      return false
     }
     if (searchQuery.value) {
-      const query = searchQuery.value.toLowerCase();
+      const query = searchQuery.value.toLowerCase()
       const searchFields = [cert.CN, cert.O, cert.TIN, cert.serialNumber].map(
-        (f) => (f || "").toLowerCase()
-      );
-      if (!searchFields.some((f) => f.includes(query))) {
-        return false;
+        f => (f || '').toLowerCase(),
+      )
+      if (!searchFields.some(f => f.includes(query))) {
+        return false
       }
     }
-    return true;
-  });
-});
+    return true
+  })
+})
 
 const typeCounts = computed(() => ({
   all: props.certificates.length,
-  pfx: props.certificates.filter((c) => c.type === "pfx").length,
-  ftjc: props.certificates.filter((c) => c.type === "ftjc").length,
-}));
+  pfx: props.certificates.filter(c => c.type === 'pfx').length,
+  ftjc: props.certificates.filter(c => c.type === 'ftjc').length,
+}))
 
 function isExpired(cert: Certificate): boolean {
-  return new Date() > cert.validTo;
+  return new Date() > cert.validTo
 }
 
 function isExpiringSoon(cert: Certificate): boolean {
-  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-  return new Date() > new Date(cert.validTo.getTime() - thirtyDays);
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000
+  return new Date() > new Date(cert.validTo.getTime() - thirtyDays)
 }
 
 function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 function selectCertificate(cert: Certificate) {
-  if (props.disabled) return;
-  emit("update:modelValue", cert);
-  emit("select", cert);
+  if (props.disabled)
+    return
+  emit('update:modelValue', cert)
+  emit('select', cert)
 }
 
 function isPfx(cert: Certificate): cert is PfxCertificate {
-  return cert.type === "pfx";
+  return cert.type === 'pfx'
 }
 
 function isFtjc(cert: Certificate): cert is FtjcCertificate {
-  return cert.type === "ftjc";
+  return cert.type === 'ftjc'
 }
 
 function isSelected(cert: Certificate): boolean {
-  return props.modelValue?.serialNumber === cert.serialNumber;
+  return props.modelValue?.serialNumber === cert.serialNumber
 }
 
 function getDaysRemaining(cert: Certificate): number {
-  const now = new Date();
-  const diff = cert.validTo.getTime() - now.getTime();
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  const now = new Date()
+  const diff = cert.validTo.getTime() - now.getTime()
+  return Math.ceil(diff / (1000 * 60 * 60 * 24))
 }
 
 defineExpose({
@@ -105,7 +106,7 @@ defineExpose({
   searchQuery,
   showExpired,
   filteredCertificates,
-});
+})
 </script>
 
 <template>
@@ -121,7 +122,7 @@ defineExpose({
           type="text"
           placeholder="Search by name, TIN, or organization..."
           :disabled="disabled"
-        />
+        >
       </div>
 
       <div class="filter-row">
@@ -139,9 +140,9 @@ defineExpose({
         </div>
 
         <label class="toggle-expired">
-          <input type="checkbox" v-model="showExpired" :disabled="disabled" />
+          <input v-model="showExpired" type="checkbox" :disabled="disabled">
           <span class="toggle-track">
-            <span class="toggle-thumb"></span>
+            <span class="toggle-thumb" />
           </span>
           <span class="toggle-label">Show expired</span>
         </label>
@@ -162,15 +163,15 @@ defineExpose({
               warning: isExpiringSoon(cert) && !isExpired(cert),
             }"
             :style="{ '--index': index }"
-            @click="selectCertificate(cert)"
             role="button"
             :aria-pressed="isSelected(cert)"
             :tabindex="disabled ? -1 : 0"
+            @click="selectCertificate(cert)"
             @keydown.enter="selectCertificate(cert)"
             @keydown.space.prevent="selectCertificate(cert)"
           >
             <!-- Selection Ring -->
-            <div class="selection-ring"></div>
+            <div class="selection-ring" />
 
             <!-- Left: Type indicator -->
             <div class="cert-type-indicator" :class="cert.type">
@@ -185,15 +186,19 @@ defineExpose({
             <!-- Middle: Content -->
             <div class="cert-content">
               <div class="cert-header">
-                <h3 class="cert-name">{{ cert.CN }}</h3>
+                <h3 class="cert-name">
+                  {{ cert.CN }}
+                </h3>
                 <span class="status-badge" :class="{ expired: isExpired(cert), warning: isExpiringSoon(cert) && !isExpired(cert) }">
-                  <span class="status-dot"></span>
+                  <span class="status-dot" />
                   <span v-if="isExpired(cert)">Expired</span>
                   <span v-else-if="isExpiringSoon(cert)">{{ getDaysRemaining(cert) }}d left</span>
                   <span v-else>Active</span>
                 </span>
               </div>
-              <p class="cert-org">{{ cert.O || 'Individual Certificate' }}</p>
+              <p class="cert-org">
+                {{ cert.O || 'Individual Certificate' }}
+              </p>
 
               <div v-if="!compact" class="cert-details">
                 <div class="detail-item">
@@ -223,7 +228,7 @@ defineExpose({
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                 </div>
-                <div v-else class="empty-circle"></div>
+                <div v-else class="empty-circle" />
               </Transition>
             </div>
           </article>
@@ -236,8 +241,12 @@ defineExpose({
             </svg>
           </div>
           <h4>No certificates found</h4>
-          <p v-if="searchQuery">Try adjusting your search terms</p>
-          <p v-else>No certificates match the current filters</p>
+          <p v-if="searchQuery">
+            Try adjusting your search terms
+          </p>
+          <p v-else>
+            No certificates match the current filters
+          </p>
         </div>
       </TransitionGroup>
     </div>

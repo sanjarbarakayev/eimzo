@@ -14,8 +14,8 @@
  * ```
  */
 
-import { CRC32 } from "../crypto/crc32";
-import { GostHash } from "../crypto/gost-hash";
+import { CRC32 } from '../crypto/crc32'
+import { GostHash } from '../crypto/gost-hash'
 
 /**
  * QRCode library interface
@@ -28,12 +28,12 @@ export interface IQRCode {
    * Generate and display a QR code
    * @param code - The data to encode in the QR code
    */
-  makeCode(code: string): void;
+  makeCode: (code: string) => void
 
   /**
    * Clear the current QR code (optional)
    */
-  clear?(): void;
+  clear?: () => void
 }
 
 /**
@@ -44,8 +44,8 @@ export interface IQRCode {
 export interface IQRCodeConstructor {
   new (
     element: HTMLElement,
-    options?: { width?: number; height?: number }
-  ): IQRCode;
+    options?: { width?: number, height?: number }
+  ): IQRCode
 }
 
 /**
@@ -53,9 +53,9 @@ export interface IQRCodeConstructor {
  */
 export interface EIMZOMobileOptions {
   /** Width of the QR code in pixels */
-  width?: number;
+  width?: number
   /** Height of the QR code in pixels */
-  height?: number;
+  height?: number
 }
 
 /**
@@ -63,9 +63,9 @@ export interface EIMZOMobileOptions {
  */
 export interface QRCodeResult {
   /** GOST hash of the document text */
-  textHash: string;
+  textHash: string
   /** Full QR code content (siteId + docNum + textHash + crc32) */
-  code: string;
+  code: string
 }
 
 /**
@@ -75,8 +75,8 @@ export interface QRCodeResult {
  * The QR code contains site ID, document number, text hash, and CRC32 checksum.
  */
 export class EIMZOMobile {
-  private readonly siteId: string;
-  private readonly qrcode: IQRCode;
+  private readonly siteId: string
+  private readonly qrcode: IQRCode
 
   /**
    * Create a new EIMZOMobile instance
@@ -102,13 +102,13 @@ export class EIMZOMobile {
     siteId: string,
     element: HTMLElement,
     QRCodeLib: IQRCodeConstructor,
-    options: EIMZOMobileOptions = {}
+    options: EIMZOMobileOptions = {},
   ) {
-    this.siteId = siteId;
+    this.siteId = siteId
     this.qrcode = new QRCodeLib(element, {
       width: options.width ?? 300,
       height: options.height ?? 300,
-    });
+    })
   }
 
   /**
@@ -130,20 +130,20 @@ export class EIMZOMobile {
    */
   makeQRCode(docNum: string, text: string): [string, string] | null {
     if (!this.siteId || !docNum || !text) {
-      return null;
+      return null
     }
 
-    const hasher = new GostHash();
-    const textHash = hasher.gosthash(text);
+    const hasher = new GostHash()
+    const textHash = hasher.gosthash(text)
 
-    const codeWithoutCrc = this.siteId + docNum + textHash;
-    const crcer = new CRC32();
-    const crc32 = crcer.calcHex(codeWithoutCrc);
-    const fullCode = codeWithoutCrc + crc32;
+    const codeWithoutCrc = this.siteId + docNum + textHash
+    const crcer = new CRC32()
+    const crc32 = crcer.calcHex(codeWithoutCrc)
+    const fullCode = codeWithoutCrc + crc32
 
-    this.qrcode.makeCode(fullCode);
+    this.qrcode.makeCode(fullCode)
 
-    return [textHash, fullCode];
+    return [textHash, fullCode]
   }
 
   /**
@@ -159,24 +159,24 @@ export class EIMZOMobile {
   static generateQRCodeData(
     siteId: string,
     docNum: string,
-    text: string
+    text: string,
   ): QRCodeResult | null {
     if (!siteId || !docNum || !text) {
-      return null;
+      return null
     }
 
-    const hasher = new GostHash();
-    const textHash = hasher.gosthash(text);
+    const hasher = new GostHash()
+    const textHash = hasher.gosthash(text)
 
-    const codeWithoutCrc = siteId + docNum + textHash;
-    const crcer = new CRC32();
-    const crc32 = crcer.calcHex(codeWithoutCrc);
-    const fullCode = codeWithoutCrc + crc32;
+    const codeWithoutCrc = siteId + docNum + textHash
+    const crcer = new CRC32()
+    const crc32 = crcer.calcHex(codeWithoutCrc)
+    const fullCode = codeWithoutCrc + crc32
 
     return {
       textHash,
       code: fullCode,
-    };
+    }
   }
 
   /**
@@ -184,9 +184,9 @@ export class EIMZOMobile {
    */
   clear(): void {
     if (this.qrcode.clear) {
-      this.qrcode.clear();
+      this.qrcode.clear()
     }
   }
 }
 
-export default EIMZOMobile;
+export default EIMZOMobile

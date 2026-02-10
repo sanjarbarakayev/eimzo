@@ -1,15 +1,16 @@
 {
   "name": "@eimzo/vue",
+  "type": "module",
   "version": "2.0.0",
   "description": "E-IMZO digital signature SDK for Vue 3",
   "author": "Sanjar Barakayev",
   "license": "MIT",
+  "homepage": "https://github.com/sanjarbarakayev/eimzo#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sanjarbarakayev/eimzo.git",
     "directory": "packages/vue"
   },
-  "homepage": "https://github.com/sanjarbarakayev/eimzo#readme",
   "bugs": {
     "url": "https://github.com/sanjarbarakayev/eimzo/issues"
   },
@@ -25,10 +26,7 @@
     "uzbekistan",
     "cryptography"
   ],
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
       "import": {
@@ -41,33 +39,52 @@
       }
     }
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "dist",
-    "README.md"
+    "README.md",
+    "dist"
   ],
-  "sideEffects": false,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "provenance": true,
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && cp src/index.d.ts dist/index.d.ts && cp src/index.d.ts dist/index.d.cts",
     "dev": "tsup --watch",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "vue-tsc --noEmit",
+    "lint": "eslint src",
     "clean": "rm -rf dist .turbo"
+  },
+  "peerDependencies": {
+    "@vue/devtools-api": "^6.6.0",
+    "vue": "^3.3.0"
+  },
+  "peerDependenciesMeta": {
+    "@vue/devtools-api": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@eimzo/core": "workspace:*"
   },
-  "peerDependencies": {
-    "vue": "^3.3.0"
-  },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.4",
+    "@vitest/coverage-v8": "^4.0.18",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.5.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
-    "vitest": "^2.0.0",
+    "unplugin-vue": "^7.1.1",
+    "vitest": "^4.0.18",
     "vue": "^3.3.0",
     "vue-tsc": "^2.0.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }

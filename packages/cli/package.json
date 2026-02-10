@@ -1,0 +1,54 @@
+{
+  "name": "@eimzo/cli",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "CLI tool for E-IMZO SDK setup and diagnostics",
+  "author": "Sanjar Barakayev",
+  "license": "MIT",
+  "homepage": "https://github.com/sanjarbarakayev/eimzo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanjarbarakayev/eimzo.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/sanjarbarakayev/eimzo/issues"
+  },
+  "keywords": [
+    "cli",
+    "e-imzo",
+    "eimzo",
+    "digital-signature",
+    "uzbekistan"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "eimzo": "./bin/eimzo.js"
+  },
+  "files": [
+    "README.md",
+    "bin",
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.0.0",
+    "commander": "^13.0.0",
+    "ora": "^8.0.0",
+    "picocolors": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  }
+}

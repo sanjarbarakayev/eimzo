@@ -1,0 +1,37 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "packages/core/src/index.ts",
+    "packages/vue/src/index.ts"
+  ],
+  "out": "apps/docs/api",
+  "plugin": ["typedoc-plugin-markdown"],
+  "gitRevision": "main",
+  "readme": "none",
+  "name": "E-IMZO SDK API Reference",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "includeVersion": true,
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "Client",
+    "Composable",
+    "Types",
+    "Events",
+    "Middleware",
+    "Utilities",
+    "i18n",
+    "*"
+  ],
+  "defaultCategory": "Other",
+  "entryPointStrategy": "expand",
+  "tsconfig": "tsconfig.json",
+  "sort": ["source-order"],
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": true,
+    "external": false
+  }
+}

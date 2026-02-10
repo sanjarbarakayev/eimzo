@@ -7,31 +7,31 @@
   Source: https://github.com/sanjarbarakayev/vue-esignature/tree/main/examples/components
 -->
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick, computed } from "vue";
-import { EIMZOMobile } from "@eimzo/vue";
+import { EIMZOMobile } from '@eimzo/vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 
 const props = defineProps<{
   /** Whether the modal is visible */
-  visible: boolean;
+  visible: boolean
   /** Site/App ID for E-IMZO mobile */
-  siteId: string;
+  siteId: string
   /** Document identifier */
-  documentNumber: string;
+  documentNumber: string
   /** Content to sign */
-  content: string;
+  content: string
   /** Polling endpoint (optional - for server-side signature retrieval) */
-  pollEndpoint?: string;
+  pollEndpoint?: string
   /** Polling interval in ms */
-  pollInterval?: number;
+  pollInterval?: number
   /** Timeout in ms (default: 5 minutes) */
-  timeout?: number;
-}>();
+  timeout?: number
+}>()
 
 const emit = defineEmits<{
-  close: [];
-  signed: [signature: string, hash: string];
-  error: [error: Error];
-}>();
+  close: []
+  signed: [signature: string, hash: string]
+  error: [error: Error]
+}>()
 
 const slots = defineSlots<{
   /**
@@ -47,77 +47,78 @@ const slots = defineSlots<{
    * </MobileQRModal>
    * ```
    */
-  qr?: (props: { code: string; size: number }) => unknown;
-}>();
+  qr?: (props: { code: string, size: number }) => unknown
+}>()
 
-type ModalState =
-  | "generating"
-  | "waiting"
-  | "checking"
-  | "success"
-  | "error"
-  | "timeout";
+type ModalState
+  = | 'generating'
+    | 'waiting'
+    | 'checking'
+    | 'success'
+    | 'error'
+    | 'timeout'
 
-const QR_SIZE = 280;
+const QR_SIZE = 280
 
-const state = ref<ModalState>("generating");
-const qrData = ref<{ hash: string; code: string } | null>(null);
-const errorMessage = ref("");
-const signature = ref("");
+const state = ref<ModalState>('generating')
+const qrData = ref<{ hash: string, code: string } | null>(null)
+const errorMessage = ref('')
+const signature = ref('')
 
-const hasQrSlot = computed(() => !!slots.qr);
+const hasQrSlot = computed(() => !!slots.qr)
 
-let pollIntervalId: ReturnType<typeof setInterval> | null = null;
-let timeoutId: ReturnType<typeof setTimeout> | null = null;
+let pollIntervalId: ReturnType<typeof setInterval> | null = null
+let timeoutId: ReturnType<typeof setTimeout> | null = null
 
 watch(
   () => props.visible,
   async (isVisible) => {
     if (isVisible) {
-      await nextTick();
-      await initQRCode();
+      await nextTick()
+      await initQRCode()
       if (props.pollEndpoint) {
-        startPolling();
+        startPolling()
       }
-    } else {
-      cleanup();
     }
-  }
-);
+    else {
+      cleanup()
+    }
+  },
+)
 
 onMounted(async () => {
   if (props.visible) {
-    await nextTick();
-    await initQRCode();
+    await nextTick()
+    await initQRCode()
     if (props.pollEndpoint) {
-      startPolling();
+      startPolling()
     }
   }
-});
+})
 
 onUnmounted(() => {
-  cleanup();
-});
+  cleanup()
+})
 
 function isValidHex(str: string): boolean {
-  return /^[0-9a-fA-F]+$/.test(str);
+  return /^[0-9a-f]+$/i.test(str)
 }
 
 async function initQRCode() {
-  state.value = "generating";
+  state.value = 'generating'
 
   try {
     // Validate that siteId and documentNumber are hex strings
     // E-IMZO mobile expects the entire QR code to be hex-parseable
     if (!isValidHex(props.siteId)) {
       throw new Error(
-        `Invalid siteId: must contain only hex characters (0-9, a-f). Got: "${props.siteId.substring(0, 20)}..."`
-      );
+        `Invalid siteId: must contain only hex characters (0-9, a-f). Got: "${props.siteId.substring(0, 20)}..."`,
+      )
     }
     if (!isValidHex(props.documentNumber)) {
       throw new Error(
-        `Invalid documentNumber: must contain only hex characters (0-9, a-f). Got: "${props.documentNumber.substring(0, 20)}..."`
-      );
+        `Invalid documentNumber: must contain only hex characters (0-9, a-f). Got: "${props.documentNumber.substring(0, 20)}..."`,
+      )
     }
 
     // Use the proper E-IMZO mobile QR code format:
@@ -125,111 +126,116 @@ async function initQRCode() {
     const result = EIMZOMobile.generateQRCodeData(
       props.siteId,
       props.documentNumber,
-      props.content
-    );
+      props.content,
+    )
 
     if (!result) {
-      throw new Error("Failed to generate QR code data: invalid parameters");
+      throw new Error('Failed to generate QR code data: invalid parameters')
     }
 
     qrData.value = {
       hash: result.textHash,
       code: result.code,
-    };
+    }
 
-    state.value = "waiting";
-  } catch (err) {
-    state.value = "error";
-    errorMessage.value =
-      err instanceof Error ? err.message : "Failed to generate QR code";
-    emit("error", err instanceof Error ? err : new Error(String(err)));
+    state.value = 'waiting'
+  }
+  catch (err) {
+    state.value = 'error'
+    errorMessage.value
+      = err instanceof Error ? err.message : 'Failed to generate QR code'
+    emit('error', err instanceof Error ? err : new Error(String(err)))
   }
 }
 
 function startPolling() {
-  const interval = props.pollInterval || 3000;
-  const timeout = props.timeout || 5 * 60 * 1000;
+  const interval = props.pollInterval || 3000
+  const timeout = props.timeout || 5 * 60 * 1000
 
-  pollIntervalId = setInterval(checkForSignature, interval);
+  pollIntervalId = setInterval(checkForSignature, interval)
 
   timeoutId = setTimeout(() => {
-    if (state.value === "waiting" || state.value === "checking") {
-      state.value = "timeout";
-      errorMessage.value = "Signing timed out. Please try again.";
-      stopPolling();
+    if (state.value === 'waiting' || state.value === 'checking') {
+      state.value = 'timeout'
+      errorMessage.value = 'Signing timed out. Please try again.'
+      stopPolling()
     }
-  }, timeout);
+  }, timeout)
 }
 
 function stopPolling() {
   if (pollIntervalId) {
-    clearInterval(pollIntervalId);
-    pollIntervalId = null;
+    clearInterval(pollIntervalId)
+    pollIntervalId = null
   }
   if (timeoutId) {
-    clearTimeout(timeoutId);
-    timeoutId = null;
+    clearTimeout(timeoutId)
+    timeoutId = null
   }
 }
 
 async function checkForSignature() {
-  if (state.value !== "waiting") return;
-  if (!props.pollEndpoint) return;
+  if (state.value !== 'waiting')
+    return
+  if (!props.pollEndpoint)
+    return
 
-  state.value = "checking";
+  state.value = 'checking'
 
   try {
     const response = await fetch(
-      `${props.pollEndpoint}/${props.documentNumber}`
-    );
-    const data = await response.json();
+      `${props.pollEndpoint}/${props.documentNumber}`,
+    )
+    const data = await response.json()
 
     if (data.signature) {
-      state.value = "success";
-      signature.value = data.signature;
-      stopPolling();
-      emit("signed", data.signature, qrData.value?.hash || "");
-    } else {
-      state.value = "waiting";
+      state.value = 'success'
+      signature.value = data.signature
+      stopPolling()
+      emit('signed', data.signature, qrData.value?.hash || '')
     }
-  } catch {
-    state.value = "waiting";
+    else {
+      state.value = 'waiting'
+    }
+  }
+  catch {
+    state.value = 'waiting'
   }
 }
 
 async function regenerateQR() {
-  stopPolling();
-  await initQRCode();
+  stopPolling()
+  await initQRCode()
   if (props.pollEndpoint) {
-    startPolling();
+    startPolling()
   }
 }
 
 function cleanup() {
-  stopPolling();
-  qrData.value = null;
-  signature.value = "";
-  errorMessage.value = "";
-  state.value = "generating";
+  stopPolling()
+  qrData.value = null
+  signature.value = ''
+  errorMessage.value = ''
+  state.value = 'generating'
 }
 
 function close() {
-  cleanup();
-  emit("close");
+  cleanup()
+  emit('close')
 }
 
 function simulateSuccess() {
-  state.value = "success";
-  signature.value = "SIMULATED_SIGNATURE_BASE64_DATA";
-  stopPolling();
-  emit("signed", signature.value, qrData.value?.hash || "");
+  state.value = 'success'
+  signature.value = 'SIMULATED_SIGNATURE_BASE64_DATA'
+  stopPolling()
+  emit('signed', signature.value, qrData.value?.hash || '')
 }
 
 defineExpose({
   regenerateQR,
   state,
   qrData,
-});
+})
 </script>
 
 <template>
@@ -239,9 +245,9 @@ defineExpose({
         <div class="modal-content" role="dialog" aria-modal="true">
           <button
             class="close-btn"
-            @click="close"
             aria-label="Close"
             type="button"
+            @click="close"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path
@@ -272,7 +278,9 @@ defineExpose({
             </div>
             <h3>{{ state === "timeout" ? "Timed Out" : "Error" }}</h3>
             <p>{{ errorMessage }}</p>
-            <button class="btn primary" @click="regenerateQR">Try Again</button>
+            <button class="btn primary" @click="regenerateQR">
+              Try Again
+            </button>
           </div>
 
           <!-- Success state -->
@@ -289,7 +297,9 @@ defineExpose({
             </div>
             <h3>Signed Successfully!</h3>
             <p>The document has been signed via mobile.</p>
-            <button class="btn primary" @click="close">Done</button>
+            <button class="btn primary" @click="close">
+              Done
+            </button>
           </div>
 
           <!-- QR code state -->
@@ -324,21 +334,21 @@ defineExpose({
               </template>
 
               <div v-if="state === 'generating'" class="qr-loading">
-                <div class="spinner"></div>
+                <div class="spinner" />
               </div>
             </div>
 
             <div class="status-indicator">
               <div v-if="state === 'generating'" class="status generating">
-                <div class="spinner small"></div>
+                <div class="spinner small" />
                 <span>Generating QR code...</span>
               </div>
               <div v-else-if="state === 'waiting'" class="status waiting">
-                <div class="pulse"></div>
+                <div class="pulse" />
                 <span>Waiting for signature...</span>
               </div>
               <div v-else-if="state === 'checking'" class="status checking">
-                <div class="spinner small"></div>
+                <div class="spinner small" />
                 <span>Checking...</span>
               </div>
             </div>
@@ -363,11 +373,9 @@ defineExpose({
               </p>
               <p class="hash">
                 <strong>Hash:</strong>
-                <code
-                  >{{ qrData.hash.substring(0, 12) }}...{{
-                    qrData.hash.substring(52)
-                  }}</code
-                >
+                <code>{{ qrData.hash.substring(0, 12) }}...{{
+                  qrData.hash.substring(52)
+                }}</code>
               </p>
             </div>
 

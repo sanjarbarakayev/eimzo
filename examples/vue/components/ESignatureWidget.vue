@@ -7,48 +7,49 @@
   Source: https://github.com/sanjarbarakayev/vue-esignature/tree/main/examples/components
 -->
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import type { Certificate, SupportedLocale } from '@eimzo/vue'
 import {
-  useESignature,
-  setLocale,
+
   getErrorMessage,
-  type Certificate,
-  type SupportedLocale,
-} from "@eimzo/vue";
-import InstallPrompt from "./InstallPrompt.vue";
-import CertificateSelector from "./CertificateSelector.vue";
+  setLocale,
+
+  useESignature,
+} from '@eimzo/vue'
+import { computed, ref, watch } from 'vue'
+import CertificateSelector from './CertificateSelector.vue'
+import InstallPrompt from './InstallPrompt.vue'
 
 const props = withDefaults(
   defineProps<{
-    content: string;
-    documentTitle?: string;
-    locale?: SupportedLocale;
-    showPreview?: boolean;
-    allowMultiple?: boolean;
-    compact?: boolean;
+    content: string
+    documentTitle?: string
+    locale?: SupportedLocale
+    showPreview?: boolean
+    allowMultiple?: boolean
+    compact?: boolean
   }>(),
   {
-    documentTitle: "Document",
-    locale: "en",
+    documentTitle: 'Document',
+    locale: 'en',
     showPreview: true,
     allowMultiple: false,
     compact: false,
-  }
-);
+  },
+)
 
 const emit = defineEmits<{
-  signed: [signature: string, certificate: Certificate];
-  error: [error: Error];
-  cancel: [];
-}>();
+  signed: [signature: string, certificate: Certificate]
+  error: [error: Error]
+  cancel: []
+}>()
 
 watch(
   () => props.locale,
   (newLocale) => {
-    setLocale(newLocale);
+    setLocale(newLocale)
   },
-  { immediate: true }
-);
+  { immediate: true },
+)
 
 const {
   install,
@@ -60,59 +61,60 @@ const {
   signWithUSB,
   signWithBAIK,
   error: composableError,
-} = useESignature();
+} = useESignature()
 
-type Step =
-  | "install"
-  | "init"
-  | "select"
-  | "confirm"
-  | "password"
-  | "signing"
-  | "success"
-  | "error";
+type Step
+  = | 'install'
+    | 'init'
+    | 'select'
+    | 'confirm'
+    | 'password'
+    | 'signing'
+    | 'success'
+    | 'error'
 
-const step = ref<Step>("install");
-const certificates = ref<Certificate[]>([]);
-const selectedCert = ref<Certificate | null>(null);
-const signature = ref("");
-const errorMessage = ref("");
-const hardwareAvailable = ref({ idCard: false, baik: false });
-const signingMethod = ref<"certificate" | "idcard" | "baik">("certificate");
-const eimzoInstalled = ref(false);
+const step = ref<Step>('install')
+const certificates = ref<Certificate[]>([])
+const selectedCert = ref<Certificate | null>(null)
+const signature = ref('')
+const errorMessage = ref('')
+const hardwareAvailable = ref({ idCard: false, baik: false })
+const signingMethod = ref<'certificate' | 'idcard' | 'baik'>('certificate')
+const eimzoInstalled = ref(false)
 
 const canSign = computed(() => {
-  if (signingMethod.value === "certificate") {
-    return selectedCert.value !== null;
+  if (signingMethod.value === 'certificate') {
+    return selectedCert.value !== null
   }
-  return hardwareAvailable.value.idCard || hardwareAvailable.value.baik;
-});
+  return hardwareAvailable.value.idCard || hardwareAvailable.value.baik
+})
 
 const currentStepIndex = computed(() => {
-  const steps: Step[] = ["select", "confirm", "password", "signing", "success"];
-  const idx = steps.indexOf(step.value);
-  return idx >= 0 ? idx : 0;
-});
+  const steps: Step[] = ['select', 'confirm', 'password', 'signing', 'success']
+  const idx = steps.indexOf(step.value)
+  return idx >= 0 ? idx : 0
+})
 
 function handleInstallDetected() {
-  eimzoInstalled.value = true;
-  initialize();
+  eimzoInstalled.value = true
+  initialize()
 }
 
 async function initialize() {
-  step.value = "init";
+  step.value = 'init'
   try {
-    await install();
-    await detectHardware();
-    certificates.value = await listKeys();
-    step.value = "select";
-  } catch (err) {
-    step.value = "error";
-    errorMessage.value =
-      err instanceof Error
-        ? getErrorMessage("ERIIMZO_NOT_INSTALLED")
-        : String(err);
-    emit("error", err as Error);
+    await install()
+    await detectHardware()
+    certificates.value = await listKeys()
+    step.value = 'select'
+  }
+  catch (err) {
+    step.value = 'error'
+    errorMessage.value
+      = err instanceof Error
+        ? getErrorMessage('ERIIMZO_NOT_INSTALLED')
+        : String(err)
+    emit('error', err as Error)
   }
 }
 
@@ -120,94 +122,102 @@ async function detectHardware() {
   const [idCard, baik] = await Promise.all([
     checkUSBToken().catch(() => false),
     checkBAIKToken().catch(() => false),
-  ]);
-  hardwareAvailable.value = { idCard, baik };
+  ])
+  hardwareAvailable.value = { idCard, baik }
 }
 
 function selectCertificate(cert: Certificate) {
-  selectedCert.value = cert;
-  signingMethod.value = "certificate";
+  selectedCert.value = cert
+  signingMethod.value = 'certificate'
 }
 
-function useHardware(type: "idcard" | "baik") {
-  signingMethod.value = type;
-  selectedCert.value = null;
+function useHardware(type: 'idcard' | 'baik') {
+  signingMethod.value = type
+  selectedCert.value = null
 }
 
 function goToConfirm() {
-  if (!canSign.value) return;
-  step.value = "confirm";
+  if (!canSign.value)
+    return
+  step.value = 'confirm'
 }
 
 function goBack() {
-  step.value = "select";
+  step.value = 'select'
 }
 
 async function performSigning() {
   try {
-    step.value = signingMethod.value === "certificate" ? "password" : "signing";
-    let sig: string;
+    step.value = signingMethod.value === 'certificate' ? 'password' : 'signing'
+    let sig: string
 
-    if (signingMethod.value === "idcard") {
-      sig = await signWithUSB(props.content);
-    } else if (signingMethod.value === "baik") {
-      sig = await signWithBAIK(props.content);
-    } else if (selectedCert.value) {
-      const { id } = await loadKey(selectedCert.value);
-      step.value = "signing";
-      const result = await signData(props.content, id);
-      sig = typeof result === "string" ? result : result.pkcs7_64;
-    } else {
-      throw new Error("No signing method selected");
+    if (signingMethod.value === 'idcard') {
+      sig = await signWithUSB(props.content)
+    }
+    else if (signingMethod.value === 'baik') {
+      sig = await signWithBAIK(props.content)
+    }
+    else if (selectedCert.value) {
+      const { id } = await loadKey(selectedCert.value)
+      step.value = 'signing'
+      const result = await signData(props.content, id)
+      sig = typeof result === 'string' ? result : result.pkcs7_64
+    }
+    else {
+      throw new Error('No signing method selected')
     }
 
-    signature.value = sig;
-    step.value = "success";
-    emit("signed", sig, selectedCert.value!);
-  } catch (err) {
-    step.value = "error";
-    errorMessage.value = err instanceof Error ? err.message : String(err);
-    emit("error", err as Error);
+    signature.value = sig
+    step.value = 'success'
+    emit('signed', sig, selectedCert.value!)
+  }
+  catch (err) {
+    step.value = 'error'
+    errorMessage.value = err instanceof Error ? err.message : String(err)
+    emit('error', err as Error)
   }
 }
 
 function reset() {
-  step.value = "select";
-  selectedCert.value = null;
-  signature.value = "";
-  errorMessage.value = "";
+  step.value = 'select'
+  selectedCert.value = null
+  signature.value = ''
+  errorMessage.value = ''
 }
 
 function cancel() {
-  emit("cancel");
+  emit('cancel')
 }
 
 function copyToClipboard() {
-  if (!signature.value) return;
+  if (!signature.value)
+    return
   window.navigator.clipboard.writeText(signature.value).catch(() => {
-    errorMessage.value = "Failed to copy to clipboard";
-  });
+    errorMessage.value = 'Failed to copy to clipboard'
+  })
 }
 
 function downloadSignature() {
-  if (!signature.value) return;
+  if (!signature.value)
+    return
   try {
-    const binaryString = atob(signature.value);
-    const bytes = new Uint8Array(binaryString.length);
+    const binaryString = atob(signature.value)
+    const bytes = new Uint8Array(binaryString.length)
     for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
+      bytes[i] = binaryString.charCodeAt(i)
     }
-    const blob = new Blob([bytes], { type: "application/pkcs7-signature" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${props.documentTitle.replace(/\s+/g, "_")}.p7s`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  } catch {
-    errorMessage.value = "Failed to download signature";
+    const blob = new Blob([bytes], { type: 'application/pkcs7-signature' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${props.documentTitle.replace(/\s+/g, '_')}.p7s`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+  catch {
+    errorMessage.value = 'Failed to download signature'
   }
 }
 
@@ -218,7 +228,7 @@ defineExpose({
   signature,
   reset,
   initialize,
-});
+})
 </script>
 
 <template>
@@ -238,21 +248,37 @@ defineExpose({
           </svg>
         </div>
         <div class="header-text">
-          <h2 v-if="step === 'install'">Connect to E-IMZO</h2>
-          <h2 v-else-if="step === 'init'">Connecting...</h2>
-          <h2 v-else-if="step === 'select'">Select Certificate</h2>
-          <h2 v-else-if="step === 'confirm'">Review & Sign</h2>
-          <h2 v-else-if="step === 'password'">Enter Password</h2>
-          <h2 v-else-if="step === 'signing'">Signing...</h2>
-          <h2 v-else-if="step === 'success'">Signed Successfully</h2>
-          <h2 v-else-if="step === 'error'">Signing Failed</h2>
+          <h2 v-if="step === 'install'">
+            Connect to E-IMZO
+          </h2>
+          <h2 v-else-if="step === 'init'">
+            Connecting...
+          </h2>
+          <h2 v-else-if="step === 'select'">
+            Select Certificate
+          </h2>
+          <h2 v-else-if="step === 'confirm'">
+            Review & Sign
+          </h2>
+          <h2 v-else-if="step === 'password'">
+            Enter Password
+          </h2>
+          <h2 v-else-if="step === 'signing'">
+            Signing...
+          </h2>
+          <h2 v-else-if="step === 'success'">
+            Signed Successfully
+          </h2>
+          <h2 v-else-if="step === 'error'">
+            Signing Failed
+          </h2>
         </div>
       </div>
       <button
         v-if="!['init', 'install'].includes(step)"
         class="close-btn"
-        @click="cancel"
         aria-label="Close"
+        @click="cancel"
       >
         <svg viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -266,12 +292,12 @@ defineExpose({
         <span class="step-num">1</span>
         <span class="step-label">Select</span>
       </div>
-      <div class="step-line" :class="{ active: currentStepIndex >= 1 }"></div>
+      <div class="step-line" :class="{ active: currentStepIndex >= 1 }" />
       <div class="step-item" :class="{ active: currentStepIndex >= 1, current: step === 'confirm' }">
         <span class="step-num">2</span>
         <span class="step-label">Review</span>
       </div>
-      <div class="step-line" :class="{ active: currentStepIndex >= 2 }"></div>
+      <div class="step-line" :class="{ active: currentStepIndex >= 2 }" />
       <div class="step-item" :class="{ active: currentStepIndex >= 4, current: ['password', 'signing', 'success'].includes(step) }">
         <span class="step-num">3</span>
         <span class="step-label">Sign</span>
@@ -288,7 +314,7 @@ defineExpose({
 
         <!-- Init Step -->
         <div v-else-if="step === 'init'" key="init" class="step-loading">
-          <div class="loader"></div>
+          <div class="loader" />
           <p>Establishing secure connection...</p>
         </div>
 
@@ -296,7 +322,9 @@ defineExpose({
         <div v-else-if="step === 'select'" key="select" class="step-select">
           <!-- Hardware Tokens -->
           <div v-if="hardwareAvailable.idCard || hardwareAvailable.baik" class="section">
-            <h3 class="section-title">Hardware Tokens</h3>
+            <h3 class="section-title">
+              Hardware Tokens
+            </h3>
             <div class="hardware-options">
               <button
                 v-if="hardwareAvailable.idCard"
@@ -325,17 +353,21 @@ defineExpose({
 
           <!-- Certificates -->
           <div class="section">
-            <h3 class="section-title">Certificates</h3>
+            <h3 class="section-title">
+              Certificates
+            </h3>
             <CertificateSelector
-              :certificates="certificates"
               v-model="selectedCert"
+              :certificates="certificates"
               :compact="compact"
               @select="selectCertificate"
             />
           </div>
 
           <footer class="step-footer">
-            <button class="btn btn-secondary" @click="cancel">Cancel</button>
+            <button class="btn btn-secondary" @click="cancel">
+              Cancel
+            </button>
             <button class="btn btn-primary" :disabled="!canSign" @click="goToConfirm">
               Continue
               <svg viewBox="0 0 20 20" fill="currentColor">
@@ -369,9 +401,9 @@ defineExpose({
               </div>
               <div class="signer-text">
                 <strong>
-                  {{ signingMethod === 'idcard' ? 'ID Card' :
-                     signingMethod === 'baik' ? 'BAIK Token' :
-                     selectedCert?.CN }}
+                  {{ signingMethod === 'idcard' ? 'ID Card'
+                    : signingMethod === 'baik' ? 'BAIK Token'
+                      : selectedCert?.CN }}
                 </strong>
                 <span v-if="selectedCert && signingMethod === 'certificate'">{{ selectedCert.O || 'Individual' }}</span>
               </div>
@@ -401,15 +433,15 @@ defineExpose({
               <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
             </svg>
           </div>
-          <p>Please enter your certificate password<br/>in the E-IMZO dialog window.</p>
+          <p>Please enter your certificate password<br>in the E-IMZO dialog window.</p>
           <div class="dots">
-            <span></span><span></span><span></span>
+            <span /><span /><span />
           </div>
         </div>
 
         <!-- Signing Step -->
         <div v-else-if="step === 'signing'" key="signing" class="step-loading">
-          <div class="loader"></div>
+          <div class="loader" />
           <p>Creating your digital signature...</p>
         </div>
 
@@ -421,12 +453,14 @@ defineExpose({
             </svg>
           </div>
           <h3>Document Signed</h3>
-          <p v-if="selectedCert">Signed by <strong>{{ selectedCert.CN }}</strong></p>
+          <p v-if="selectedCert">
+            Signed by <strong>{{ selectedCert.CN }}</strong>
+          </p>
 
           <div v-if="!compact" class="signature-preview">
             <div class="sig-label">
               <span>Signature</span>
-              <button class="copy-btn" @click="copyToClipboard" title="Copy to clipboard">
+              <button class="copy-btn" title="Copy to clipboard" @click="copyToClipboard">
                 <svg viewBox="0 0 20 20" fill="currentColor">
                   <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                   <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
@@ -443,8 +477,12 @@ defineExpose({
               </svg>
               Download .p7s
             </button>
-            <button v-if="allowMultiple" class="btn btn-secondary" @click="reset">Sign Another</button>
-            <button class="btn btn-primary" @click="cancel">Done</button>
+            <button v-if="allowMultiple" class="btn btn-secondary" @click="reset">
+              Sign Another
+            </button>
+            <button class="btn btn-primary" @click="cancel">
+              Done
+            </button>
           </footer>
         </div>
 
@@ -456,11 +494,17 @@ defineExpose({
             </svg>
           </div>
           <h3>Something went wrong</h3>
-          <p class="error-text">{{ errorMessage || composableError }}</p>
+          <p class="error-text">
+            {{ errorMessage || composableError }}
+          </p>
 
           <footer class="step-footer">
-            <button class="btn btn-secondary" @click="cancel">Cancel</button>
-            <button class="btn btn-primary" @click="reset">Try Again</button>
+            <button class="btn btn-secondary" @click="cancel">
+              Cancel
+            </button>
+            <button class="btn btn-primary" @click="reset">
+              Try Again
+            </button>
           </footer>
         </div>
       </Transition>

@@ -1,18 +1,23 @@
 {
   "name": "eimzo",
-  "private": true,
+  "type": "module",
   "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
   "description": "E-IMZO digital signature SDK for JavaScript frameworks",
+  "author": "Sanjar Barakayev",
+  "license": "MIT",
+  "homepage": "https://github.com/sanjarbarakayev/eimzo#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sanjarbarakayev/eimzo.git"
   },
-  "homepage": "https://github.com/sanjarbarakayev/eimzo#readme",
   "bugs": {
     "url": "https://github.com/sanjarbarakayev/eimzo/issues"
   },
-  "author": "Sanjar Barakayev",
-  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
@@ -23,15 +28,34 @@
     "clean": "turbo clean && rm -rf node_modules",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "turbo build && changeset publish"
+    "release": "turbo build && changeset publish",
+    "docs:dev": "pnpm --filter @eimzo/docs dev",
+    "docs:build": "pnpm typedoc && pnpm --filter @eimzo/docs build",
+    "docs:preview": "pnpm --filter @eimzo/docs preview",
+    "playground:dev": "pnpm --filter @eimzo/playground dev",
+    "playground:build": "pnpm --filter @eimzo/playground build",
+    "typedoc": "typedoc",
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^7.2.0",
+    "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.0",
+    "eslint": "^9.39.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "turbo": "^2.0.0",
+    "typedoc": "^0.26.0",
+    "typedoc-plugin-markdown": "^4.0.0",
     "typescript": "^5.3.0"
   },
-  "packageManager": "pnpm@9.0.0",
-  "engines": {
-    "node": ">=18.0.0"
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix"
+    ],
+    "*.{json,yaml,yml}": [
+      "eslint --fix"
+    ]
   }
 }

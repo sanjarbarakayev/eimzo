@@ -22,16 +22,35 @@
  * ```
  */
 
-// Vue Plugin
-export { VueESignature, ESIGNATURE_INJECTION_KEY } from "./plugin";
-export { default } from "./plugin";
+export {
+  ERROR_BOUNDARY_KEY,
+  type ErrorBoundaryContext,
+  type ErrorBoundarySlotProps,
+  type ESignatureErrorBoundaryProps,
+} from './components/error-boundary-types'
+// Components
+export { default as ESignatureErrorBoundary } from './components/ESignatureErrorBoundary.vue'
 
 // Composable
-export { useESignature } from "./composable";
-export type { UseESignatureReturn, UseESignatureOptions } from "./composable";
+export { useESignature } from './composable'
+export type { UseESignatureOptions, UseESignatureReturn } from './composable'
 
+// Composables
+export { useErrorBoundary } from './composables/useErrorBoundary'
+
+// Client Factory
+export { createEIMZOClient } from './create-client'
+export type { EnhancedEIMZOClient } from './create-client'
+
+// DevTools
+export { emitDevToolsEvent, setupDevtools } from './devtools'
 // ESignature class (for non-composable usage)
-export { ESignature } from "./eimzo";
+export { ESignature } from './eimzo'
+
+// Vue Plugin
+export { ESIGNATURE_INJECTION_KEY, VueESignature } from './plugin'
+
+export { default } from './plugin'
 
 // Re-export everything from core for convenience
-export * from "@eimzo/core";
+export * from '@eimzo/core'

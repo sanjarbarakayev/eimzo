@@ -1,5 +1,11 @@
 # @eimzo/core
 
+[![npm version](https://img.shields.io/npm/v/@eimzo/core)](https://www.npmjs.com/package/@eimzo/core)
+[![npm downloads](https://img.shields.io/npm/dm/@eimzo/core)](https://www.npmjs.com/package/@eimzo/core)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@eimzo/core)](https://bundlephobia.com/package/@eimzo/core)
+[![license](https://img.shields.io/npm/l/@eimzo/core)](https://github.com/sanjarbarakayev/eimzo/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
 Framework-agnostic core library for E-IMZO electronic digital signature system.
 
 ## Installation
@@ -11,7 +17,7 @@ npm install @eimzo/core
 ## Usage
 
 ```typescript
-import { EIMZOClient, CAPIWS, detectEIMZO } from '@eimzo/core'
+import { CAPIWS, detectEIMZO, EIMZOClient } from '@eimzo/core'
 
 // Check if E-IMZO is installed
 const status = await detectEIMZO()
@@ -41,7 +47,7 @@ const result = EIMZOMobile.generateQRCodeData('siteId', 'docNumber', 'content')
 ### Internationalization
 
 ```typescript
-import { setLocale, getErrorMessage } from '@eimzo/core/i18n'
+import { getErrorMessage, setLocale } from '@eimzo/core/i18n'
 
 setLocale('uz')
 console.log(getErrorMessage('WRONG_PASSWORD'))

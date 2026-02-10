@@ -7,141 +7,147 @@
   Source: https://github.com/sanjarbarakayev/vue-esignature/tree/main/examples/components
 -->
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from "vue";
-import { detectEIMZO, type EIMZOStatus } from "@eimzo/vue";
+import type { EIMZOStatus } from '@eimzo/vue'
+import { detectEIMZO } from '@eimzo/vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 
 const props = withDefaults(
   defineProps<{
     /** Auto-check on mount */
-    autoCheck?: boolean;
+    autoCheck?: boolean
     /** Interval to re-check (ms), 0 to disable */
-    checkInterval?: number;
+    checkInterval?: number
     /** Show detailed tooltip */
-    showTooltip?: boolean;
+    showTooltip?: boolean
     /** Size variant */
-    size?: "sm" | "md" | "lg";
+    size?: 'sm' | 'md' | 'lg'
   }>(),
   {
     autoCheck: true,
     checkInterval: 0,
     showTooltip: true,
-    size: "md",
-  }
-);
+    size: 'md',
+  },
+)
 
 const emit = defineEmits<{
-  statusChange: [status: EIMZOStatus];
-}>();
+  statusChange: [status: EIMZOStatus]
+}>()
 
-type ConnectionState = "checking" | "connected" | "disconnected" | "error";
+type ConnectionState = 'checking' | 'connected' | 'disconnected' | 'error'
 
-const state = ref<ConnectionState>("checking");
-const status = ref<EIMZOStatus | null>(null);
-const showTooltipPopup = ref(false);
-let intervalId: ReturnType<typeof setInterval> | null = null;
+const state = ref<ConnectionState>('checking')
+const status = ref<EIMZOStatus | null>(null)
+const showTooltipPopup = ref(false)
+let intervalId: ReturnType<typeof setInterval> | null = null
 
 const statusLabel = computed(() => {
   switch (state.value) {
-    case "checking":
-      return "Checking...";
-    case "connected":
-      return "E-IMZO Connected";
-    case "disconnected":
-      return "Not Installed";
-    case "error":
-      return "Error";
+    case 'checking':
+      return 'Checking...'
+    case 'connected':
+      return 'E-IMZO Connected'
+    case 'disconnected':
+      return 'Not Installed'
+    case 'error':
+      return 'Error'
     default:
-      return "Unknown";
+      return 'Unknown'
   }
-});
+})
 
 const tooltipText = computed(() => {
-  if (!status.value) return "Checking E-IMZO status...";
+  if (!status.value)
+    return 'Checking E-IMZO status...'
 
   if (!status.value.browserSupported) {
-    return "Browser does not support WebSocket";
+    return 'Browser does not support WebSocket'
   }
 
   if (status.value.isRunning) {
-    return `E-IMZO running on port ${status.value.port}`;
+    return `E-IMZO running on port ${status.value.port}`
   }
 
-  return "E-IMZO is not installed or not running. Click to download.";
-});
+  return 'E-IMZO is not installed or not running. Click to download.'
+})
 
 async function checkStatus() {
-  state.value = "checking";
+  state.value = 'checking'
 
   try {
-    const result = await detectEIMZO();
-    status.value = result;
+    const result = await detectEIMZO()
+    status.value = result
 
     if (!result.browserSupported) {
-      state.value = "error";
-    } else if (result.isRunning) {
-      state.value = "connected";
-    } else {
-      state.value = "disconnected";
+      state.value = 'error'
+    }
+    else if (result.isRunning) {
+      state.value = 'connected'
+    }
+    else {
+      state.value = 'disconnected'
     }
 
-    emit("statusChange", result);
-  } catch {
-    state.value = "error";
+    emit('statusChange', result)
+  }
+  catch {
+    state.value = 'error'
   }
 }
 
 function handleClick() {
-  if (state.value === "disconnected") {
-    window.open("https://e-imzo.soliq.uz/download/", "_blank");
-  } else {
-    checkStatus();
+  if (state.value === 'disconnected') {
+    window.open('https://e-imzo.soliq.uz/download/', '_blank')
+  }
+  else {
+    checkStatus()
   }
 }
 
 onMounted(() => {
   if (props.autoCheck) {
-    checkStatus();
+    checkStatus()
   }
 
   if (props.checkInterval > 0) {
-    intervalId = setInterval(checkStatus, props.checkInterval);
+    intervalId = setInterval(checkStatus, props.checkInterval)
   }
-});
+})
 
 onUnmounted(() => {
   if (intervalId) {
-    clearInterval(intervalId);
+    clearInterval(intervalId)
   }
-});
+})
 
 watch(
   () => props.checkInterval,
   (newVal) => {
     if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
+      clearInterval(intervalId)
+      intervalId = null
     }
     if (newVal > 0) {
-      intervalId = setInterval(checkStatus, newVal);
+      intervalId = setInterval(checkStatus, newVal)
     }
-  }
-);
+  },
+)
 
-defineExpose({ checkStatus, status });
+defineExpose({ checkStatus, status })
 </script>
 
 <template>
   <div
     class="status-indicator"
     :class="[state, size]"
+    role="status"
+    :aria-label="statusLabel"
     @click="handleClick"
     @mouseenter="showTooltipPopup = true"
     @mouseleave="showTooltipPopup = false"
-    role="status"
-    :aria-label="statusLabel"
   >
     <span class="status-dot" :class="state">
-      <span v-if="state === 'checking'" class="spinner"></span>
+      <span v-if="state === 'checking'" class="spinner" />
     </span>
     <span class="status-label">{{ statusLabel }}</span>
 
