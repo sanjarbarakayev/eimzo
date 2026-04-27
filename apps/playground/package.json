@@ -12,7 +12,7 @@
     "@eimzo/core": "workspace:*",
     "@eimzo/vue": "workspace:*",
     "pinia": "^2.3.0",
-    "vue": "^3.5.0"
+    "vue": "^3.5.33"
   },
   "devDependencies": {
     "@monaco-editor/loader": "^1.4.0",
@@ -20,6 +20,6 @@
     "monaco-editor": "^0.52.0",
     "typescript": "^5.3.0",
     "vite": "^6.0.0",
-    "vue-tsc": "^2.0.0"
+    "vue-tsc": "^3.2.7"
   }
 }
